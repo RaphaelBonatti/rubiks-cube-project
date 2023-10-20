@@ -61,6 +61,11 @@ void ComputationalRepresentation::compute_corner_permutation_and_orientation(
         Representation::corner_facets_to_colors(i, flat_cube);
     string sorted_colors = corner_colors;
     sort(sorted_colors.begin(), sorted_colors.end());
+    if (Representation::sorted_colors_to_corner_id.find(sorted_colors) ==
+        Representation::sorted_colors_to_corner_id.end()) {
+      throw std::invalid_argument("Corner cubie '" + sorted_colors +
+                                  "' does not exist!");
+    }
     int corner_id = Representation::sorted_colors_to_corner_id[sorted_colors];
     corner_permutation[i] = corner_id;
     char primary_facet_color = corner_colors[0];
@@ -76,6 +81,11 @@ void ComputationalRepresentation::compute_edge_permutation_and_orientation(
     string edge_colors = Representation::edge_facets_to_colors(i, flat_cube);
     string sorted_colors = edge_colors;
     sort(sorted_colors.begin(), sorted_colors.end());
+    if (Representation::sorted_colors_to_edge_id.find(sorted_colors) ==
+        Representation::sorted_colors_to_edge_id.end()) {
+      throw std::invalid_argument("Edge cubie '" + sorted_colors +
+                                  "' does not exist!");
+    }
     int edge_id = Representation::sorted_colors_to_edge_id[sorted_colors];
     edge_permutation[i] = edge_id;
     char primary_facet_color = edge_colors[0];

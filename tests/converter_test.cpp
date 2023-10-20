@@ -7,8 +7,31 @@
 using testing::ElementsAre;
 using testing::Test;
 
-TEST(ConfigurationTest, Identity) {
-  NumericalRepresentation num_rep = {};
+TEST(ExceptionTest, ImpossibleCombination) {
+  char flat_cube[48] = {
+      'L', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'L', 'L', 'L', 'L',
+      'U', 'L', 'L', 'L', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F',
+      'R', 'R', 'R', 'R', 'R', 'R', 'R', 'R', 'B', 'B', 'B', 'B',
+      'B', 'B', 'B', 'B', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D',
+  };
+  EXPECT_THAT(
+      [&]() -> void { ComputationalRepresentation comp_rep(flat_cube); },
+      testing::ThrowsMessage<std::invalid_argument>(
+          "Corner cubie 'BLL' does not exist!"));
+}
+
+TEST(VerificationTest, InvalidCombination) {
+  char flat_cube[48] = {
+      'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'L', 'L', 'L', 'L',
+      'L', 'L', 'L', 'L', 'F', 'R', 'F', 'F', 'F', 'F', 'F', 'F',
+      'R', 'F', 'R', 'R', 'R', 'R', 'R', 'R', 'B', 'B', 'B', 'B',
+      'B', 'B', 'B', 'B', 'D', 'D', 'D', 'D', 'D', 'D', 'D', 'D',
+  };
+  ComputationalRepresentation comp_rep(flat_cube);
+  ASSERT_FALSE(comp_rep.check_combination());
+}
+
+TEST(VerificationTest, ValidCombination) {
   char flat_cube[48] = {
       'U', 'U', 'U', 'U', 'U', 'U', 'U', 'U', 'L', 'L', 'L', 'L',
       'L', 'L', 'L', 'L', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F',

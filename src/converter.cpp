@@ -1,6 +1,8 @@
 #include "converter.hpp"
+#include "computational_representation.hpp"
 #include <algorithm>
 #include <iostream>
+#include <stdexcept>
 
 using std::cout;
 using std::sort;
@@ -52,68 +54,94 @@ string Representation::edge_facets_to_colors(int edge_id, char flat_cube[]) {
   return colors;
 }
 
-void compute_corner_permutation_and_orientation(
-    NumericalRepresentation &num_rep, char flat_cube[]) {
+void ComputationalRepresentation::compute_corner_permutation_and_orientation(
+    char flat_cube[]) {
   for (int i = 0; i < 8; ++i) {
     string corner_colors =
         Representation::corner_facets_to_colors(i, flat_cube);
     string sorted_colors = corner_colors;
     sort(sorted_colors.begin(), sorted_colors.end());
     int corner_id = Representation::sorted_colors_to_corner_id[sorted_colors];
-    num_rep.corner_permutation[i] = corner_id;
+    corner_permutation[i] = corner_id;
     char primary_facet_color = corner_colors[0];
-    num_rep.corner_orientation[corner_id - 1] =
+    corner_orientation[corner_id - 1] =
         Representation::corner_color_to_orientation[corner_id - 1]
                                                    [primary_facet_color];
   }
 }
 
-void compute_edge_permutation_and_orientation(NumericalRepresentation &num_rep,
-                                              char flat_cube[]) {
+void ComputationalRepresentation::compute_edge_permutation_and_orientation(
+    char flat_cube[]) {
   for (int i = 0; i < 12; ++i) {
     string edge_colors = Representation::edge_facets_to_colors(i, flat_cube);
     string sorted_colors = edge_colors;
     sort(sorted_colors.begin(), sorted_colors.end());
     int edge_id = Representation::sorted_colors_to_edge_id[sorted_colors];
-    num_rep.edge_permutation[i] = edge_id;
+    edge_permutation[i] = edge_id;
     char primary_facet_color = edge_colors[0];
-    num_rep.edge_orientation[edge_id - 1] =
+    edge_orientation[edge_id - 1] =
         Representation::edge_color_to_orientation[edge_id - 1]
                                                  [primary_facet_color];
   }
 }
 
-bool check_combination(NumericalRepresentation &num_rep) {
+ComputationalRepresentation::ComputationalRepresentation(char flat_cube[]) {
+  compute_corner_permutation_and_orientation(flat_cube);
+  compute_edge_permutation_and_orientation(flat_cube);
+}
+
+bool ComputationalRepresentation::check_cubies() {
+  for (int i = 0; i < 8; ++i) {
+    if (corner_permutation[i] == 0) {
+      return false;
+    }
+  }
+  for (int i = 0; i < 12; ++i) {
+    if (edge_permutation[i] == 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool ComputationalRepresentation::check_permutations() {
   int count_corner_inversions = 0;
   for (int i = 0; i < 7; ++i) {
     for (int j = i; j < 8; ++j) {
       count_corner_inversions +=
-          int(num_rep.corner_permutation[i] > num_rep.corner_permutation[j]);
+          int(corner_permutation[i] > corner_permutation[j]);
     }
   }
   int count_edge_inversions = 0;
   for (int i = 0; i < 11; ++i) {
     for (int j = i; j < 12; ++j) {
-      count_edge_inversions +=
-          int(num_rep.edge_permutation[i] > num_rep.edge_permutation[j]);
+      count_edge_inversions += int(edge_permutation[i] > edge_permutation[j]);
     }
   }
   if (count_corner_inversions % 2 != count_edge_inversions % 2) {
     return false;
   }
+  return true;
+}
+
+bool ComputationalRepresentation::check_orientations() {
   int sum_corner_orientations = 0;
   for (int i = 0; i < 8; ++i) {
-    sum_corner_orientations += num_rep.corner_orientation[i];
+    sum_corner_orientations += corner_orientation[i];
   }
   if (sum_corner_orientations % 3 != 0) {
     return false;
   }
   int sum_edge_orientations = 0;
   for (int i = 0; i < 12; ++i) {
-    sum_edge_orientations += num_rep.edge_orientation[i];
+    sum_edge_orientations += edge_orientation[i];
   }
   if (sum_edge_orientations % 2 != 0) {
     return false;
   }
   return true;
+}
+
+bool ComputationalRepresentation::check_combination() {
+  return check_cubies() && check_permutations() && check_orientations();
 }

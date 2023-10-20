@@ -82,3 +82,38 @@ void compute_edge_permutation_and_orientation(NumericalRepresentation &num_rep,
                                                  [primary_facet_color];
   }
 }
+
+bool check_combination(NumericalRepresentation &num_rep) {
+  int count_corner_inversions = 0;
+  for (int i = 0; i < 7; ++i) {
+    for (int j = i; j < 8; ++j) {
+      count_corner_inversions +=
+          int(num_rep.corner_permutation[i] > num_rep.corner_permutation[j]);
+    }
+  }
+  int count_edge_inversions = 0;
+  for (int i = 0; i < 11; ++i) {
+    for (int j = i; j < 12; ++j) {
+      count_edge_inversions +=
+          int(num_rep.edge_permutation[i] > num_rep.edge_permutation[j]);
+    }
+  }
+  if (count_corner_inversions % 2 != count_edge_inversions % 2) {
+    return false;
+  }
+  int sum_corner_orientations = 0;
+  for (int i = 0; i < 8; ++i) {
+    sum_corner_orientations += num_rep.corner_orientation[i];
+  }
+  if (sum_corner_orientations % 3 != 0) {
+    return false;
+  }
+  int sum_edge_orientations = 0;
+  for (int i = 0; i < 12; ++i) {
+    sum_edge_orientations += num_rep.edge_orientation[i];
+  }
+  if (sum_edge_orientations % 2 != 0) {
+    return false;
+  }
+  return true;
+}

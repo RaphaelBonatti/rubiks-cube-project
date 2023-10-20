@@ -30,5 +30,6 @@ void compute_corner_permutation_and_orientation(
     NumericalRepresentation &num_rep, char flat_cube[]);
 void compute_edge_permutation_and_orientation(NumericalRepresentation &num_rep,
                                               char flat_cube[]);
+bool check_combination(NumericalRepresentation &num_rep);
 
 #endif

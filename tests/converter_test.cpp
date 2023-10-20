@@ -21,6 +21,7 @@ TEST(ConfigurationTest, Identity) {
               ElementsAre(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
   ASSERT_THAT(num_rep.edge_orientation,
               ElementsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  ASSERT_TRUE(check_combination(num_rep));
 }
 
 TEST(ConfigurationTest, U) {
@@ -39,6 +40,7 @@ TEST(ConfigurationTest, U) {
               ElementsAre(4, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12));
   ASSERT_THAT(num_rep.edge_orientation,
               ElementsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  ASSERT_TRUE(check_combination(num_rep));
 }
 
 TEST(ConfigurationTest, UInverse) {
@@ -57,6 +59,7 @@ TEST(ConfigurationTest, UInverse) {
               ElementsAre(2, 3, 4, 1, 5, 6, 7, 8, 9, 10, 11, 12));
   ASSERT_THAT(num_rep.edge_orientation,
               ElementsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  ASSERT_TRUE(check_combination(num_rep));
 }
 
 TEST(ConfigurationTest, R) {
@@ -75,6 +78,7 @@ TEST(ConfigurationTest, R) {
               ElementsAre(1, 7, 3, 4, 5, 2, 10, 8, 9, 6, 11, 12));
   ASSERT_THAT(num_rep.edge_orientation,
               ElementsAre(0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0));
+  ASSERT_TRUE(check_combination(num_rep));
 }
 
 TEST(ConfigurationTest, RInverse) {
@@ -93,6 +97,7 @@ TEST(ConfigurationTest, RInverse) {
               ElementsAre(1, 6, 3, 4, 5, 10, 2, 8, 9, 7, 11, 12));
   ASSERT_THAT(num_rep.edge_orientation,
               ElementsAre(0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0));
+  ASSERT_TRUE(check_combination(num_rep));
 }
 
 TEST(ConfigurationTest, L) {
@@ -111,6 +116,7 @@ TEST(ConfigurationTest, L) {
               ElementsAre(1, 2, 3, 5, 12, 6, 7, 4, 9, 10, 11, 8));
   ASSERT_THAT(num_rep.edge_orientation,
               ElementsAre(0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1));
+  ASSERT_TRUE(check_combination(num_rep));
 }
 
 TEST(ConfigurationTest, D) {
@@ -129,6 +135,7 @@ TEST(ConfigurationTest, D) {
               ElementsAre(1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 9));
   ASSERT_THAT(num_rep.edge_orientation,
               ElementsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  ASSERT_TRUE(check_combination(num_rep));
 }
 
 TEST(ConfigurationTest, F) {
@@ -147,6 +154,7 @@ TEST(ConfigurationTest, F) {
               ElementsAre(1, 2, 8, 4, 5, 6, 3, 11, 9, 10, 7, 12));
   ASSERT_THAT(num_rep.edge_orientation,
               ElementsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  ASSERT_TRUE(check_combination(num_rep));
 }
 
 TEST(ConfigurationTest, B) {
@@ -165,6 +173,7 @@ TEST(ConfigurationTest, B) {
               ElementsAre(6, 2, 3, 4, 1, 9, 7, 8, 5, 10, 11, 12));
   ASSERT_THAT(num_rep.edge_orientation,
               ElementsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+  ASSERT_TRUE(check_combination(num_rep));
 }
 
 TEST(ConfigurationTest, UR) {
@@ -183,4 +192,5 @@ TEST(ConfigurationTest, UR) {
               ElementsAre(4, 7, 2, 3, 5, 1, 10, 8, 9, 6, 11, 12));
   ASSERT_THAT(num_rep.edge_orientation,
               ElementsAre(1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0));
+  ASSERT_TRUE(check_combination(num_rep));
 }

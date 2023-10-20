@@ -1,4 +1,4 @@
-# rubicks-cube-project
+# rubiks-cube-project
 
 ## Build, run and test
 To build the software follow these steps:

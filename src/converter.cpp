@@ -54,7 +54,7 @@ string Representation::edge_facets_to_colors(int edge_id, char flat_cube[]) {
   return colors;
 }
 
-void ComputationalRepresentation::compute_corner_permutation_and_orientation(
+void ComputationalRepresentation::computeCornerPermutationAndOrientation(
     char flat_cube[]) {
   for (int i = 0; i < 8; ++i) {
     string corner_colors =
@@ -75,7 +75,7 @@ void ComputationalRepresentation::compute_corner_permutation_and_orientation(
   }
 }
 
-void ComputationalRepresentation::compute_edge_permutation_and_orientation(
+void ComputationalRepresentation::computeEdgePermutationAndOrientation(
     char flat_cube[]) {
   for (int i = 0; i < 12; ++i) {
     string edge_colors = Representation::edge_facets_to_colors(i, flat_cube);
@@ -96,11 +96,11 @@ void ComputationalRepresentation::compute_edge_permutation_and_orientation(
 }
 
 ComputationalRepresentation::ComputationalRepresentation(char flat_cube[]) {
-  compute_corner_permutation_and_orientation(flat_cube);
-  compute_edge_permutation_and_orientation(flat_cube);
+  computeCornerPermutationAndOrientation(flat_cube);
+  computeEdgePermutationAndOrientation(flat_cube);
 }
 
-bool ComputationalRepresentation::check_cubies() {
+bool ComputationalRepresentation::checkCubies() {
   for (int i = 0; i < 8; ++i) {
     if (corner_permutation[i] == 0) {
       return false;
@@ -114,7 +114,7 @@ bool ComputationalRepresentation::check_cubies() {
   return true;
 }
 
-bool ComputationalRepresentation::check_permutations() {
+bool ComputationalRepresentation::checkPermutations() {
   int count_corner_inversions = 0;
   for (int i = 0; i < 7; ++i) {
     for (int j = i; j < 8; ++j) {
@@ -134,7 +134,7 @@ bool ComputationalRepresentation::check_permutations() {
   return true;
 }
 
-bool ComputationalRepresentation::check_orientations() {
+bool ComputationalRepresentation::checkOrientations() {
   int sum_corner_orientations = 0;
   for (int i = 0; i < 8; ++i) {
     sum_corner_orientations += corner_orientation[i];
@@ -152,6 +152,6 @@ bool ComputationalRepresentation::check_orientations() {
   return true;
 }
 
-bool ComputationalRepresentation::check_combination() {
-  return check_cubies() && check_permutations() && check_orientations();
+bool ComputationalRepresentation::checkCombination() {
+  return checkCubies() && checkPermutations() && checkOrientations();
 }

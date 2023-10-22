@@ -9,14 +9,14 @@ public:
   int edge_orientation[12] = {0};
 
   ComputationalRepresentation(char flat_cube[]);
-  bool check_combination();
+  bool checkCombination();
 
 private:
-  void compute_corner_permutation_and_orientation(char flat_cube[]);
-  void compute_edge_permutation_and_orientation(char flat_cube[]);
-  bool check_cubies();
-  bool check_permutations();
-  bool check_orientations();
+  void computeCornerPermutationAndOrientation(char flat_cube[]);
+  void computeEdgePermutationAndOrientation(char flat_cube[]);
+  bool checkCubies();
+  bool checkPermutations();
+  bool checkOrientations();
 };
 
 #endif

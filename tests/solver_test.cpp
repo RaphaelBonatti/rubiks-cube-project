@@ -76,11 +76,25 @@ TEST(RotationTest, testRotationLIsCorrect) {
 
 TEST(RotationTest, testRotationRUIsCorrect) {
   ComputationalRepresentation comp_rep;
-  comp_rep.rotate(5);
+  comp_rep.rotate(0);
+  comp_rep.rotate(4);
   ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(4, 2, 7, 3, 5, 1, 6, 8));
   ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(1, 2, 0, 0, 0, 2, 1, 0));
   ASSERT_THAT(comp_rep.edge_permutation,
               ElementsAre(4, 7, 2, 3, 5, 1, 10, 8, 9, 6, 11, 12));
+  ASSERT_THAT(comp_rep.edge_orientation,
+              ElementsAre(1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0));
+}
+
+TEST(RotationTest, testRotationFRUIsCorrect) {
+  ComputationalRepresentation comp_rep;
+  comp_rep.rotate(0);
+  comp_rep.rotate(4);
+  comp_rep.rotate(2);
+  ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(4, 2, 3, 8, 5, 1, 7, 6));
+  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(1, 2, 2, 0, 0, 1, 2, 1));
+  ASSERT_THAT(comp_rep.edge_permutation,
+              ElementsAre(4, 7, 8, 3, 5, 1, 2, 11, 9, 6, 10, 12));
   ASSERT_THAT(comp_rep.edge_orientation,
               ElementsAre(1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0));
 }

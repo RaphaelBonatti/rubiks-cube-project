@@ -95,6 +95,15 @@ void ComputationalRepresentation::computeEdgePermutationAndOrientation(
   }
 }
 
+ComputationalRepresentation::ComputationalRepresentation() {
+  for (int i = 0; i < 8; ++i) {
+    corner_permutation[i] = i + 1;
+  }
+  for (int i = 0; i < 12; ++i) {
+    edge_permutation[i] = i + 1;
+  }
+}
+
 ComputationalRepresentation::ComputationalRepresentation(char flat_cube[]) {
   computeCornerPermutationAndOrientation(flat_cube);
   computeEdgePermutationAndOrientation(flat_cube);

@@ -1,4 +1,3 @@
-#include "computational_representation.hpp"
-#include "converter.hpp"
+#include "computationalrepresentation.hpp"
 
 int main() { return 0; }

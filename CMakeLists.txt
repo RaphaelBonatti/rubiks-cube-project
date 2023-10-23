@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(converter LANGUAGES CXX)
+project(rubiks_cube_app LANGUAGES CXX)
 
 # Get googletest
 include(FetchContent)
@@ -17,16 +17,18 @@ if(NOT googletest_POPULATED)
     add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BUILD_DIR})
 endif()
 
-include_directories(src include tests)
+include_directories(include)
 
-add_library(converter STATIC src/converter.cpp)
-add_library(solver STATIC src/solver.cpp)
+add_library(representation src/computationalrepresentation.cpp src/piecesmapping.cpp src/facerotations.cpp)
 
-add_executable(main src/main.cpp)
-target_link_libraries(main converter solver)
+# add_library(converter src/converter.cpp src/computationalrepresentation.cpp src/piecesmapping.cpp)
+# add_library(solver src/solver.cpp src/facerotations.cpp)
 
-add_executable(converter_test tests/converter_test.cpp)
-target_link_libraries(converter_test converter gtest_main gmock_main)
+# add_executable(${PROJECT_NAME} src/main.cpp)
+# target_link_libraries(${PROJECT_NAME} converter solver)
 
-add_executable(solver_test tests/solver_test.cpp)
-target_link_libraries(solver_test solver converter gtest_main gmock_main)
+add_executable(test_converter tests/converter_test.cpp)
+target_link_libraries(test_converter representation gtest_main gmock_main)
+
+add_executable(test_solver tests/solver_test.cpp)
+target_link_libraries(test_solver representation gtest_main gmock_main)

@@ -68,9 +68,9 @@ void pruning::indexToEdgeOrientation(int index, int orientation[]) {
 
 void pruning::lehmerCodeDecode(int index, int permutation[], unsigned size) {
   permutation[size - 1] = 1;
-  for (int i = size - 1; i >= 0; --i) {
-    permutation[i] = 1 + (index % (size - 1 - i));
-    index = (index - (index % (size - 1 - i))) / (size - 1 - i);
+  for (int i = size - 2; i >= 0; --i) {
+    permutation[i] = 1 + (index % (size - i));
+    index = (index - (index % (size - i))) / (size - i);
     for (int j = i + 1; j < size; ++j) {
       permutation[j] = permutation[j] + int(permutation[j] >= permutation[i]);
     }

@@ -90,3 +90,35 @@ TEST(IndexationTest, testEdgesPermutationRPositionIsIndex18552630) {
   int index = pruning::edgesPermutationToIndex(permutation);
   ASSERT_EQ(index, 18552630);
 }
+
+TEST(StateRecoveryTest, testCornerOrientationToIndex) {
+  int orientation[8] = {0, 1, 2, 0, 0, 2, 1, 0};
+  int index = pruning::cornersOrientationToIndex(orientation);
+  int temp[8] = {0};
+  pruning::indexToCornerOrientation(index, temp);
+  ASSERT_THAT(temp, ElementsAre(0, 1, 2, 0, 0, 2, 1, 0));
+}
+
+TEST(StateRecoveryTest, testEdgesOrientationToIndex) {
+  int orientation[12] = {0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0};
+  int index = pruning::edgesOrientationToIndex(orientation);
+  int temp[12] = {0};
+  pruning::indexToEdgeOrientation(index, temp);
+  ASSERT_THAT(temp, ElementsAre(0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0));
+}
+
+TEST(StateRecoveryTest, testCornerPermutationToIndex) {
+  int permutation[8] = {1, 3, 7, 4, 5, 2, 6, 8};
+  int index = pruning::cornersPermutationToIndex(permutation);
+  int temp[8] = {0};
+  pruning::indexToCornerPermutation(index, temp);
+  ASSERT_THAT(temp, ElementsAre(1, 3, 7, 4, 5, 2, 6, 8));
+}
+
+TEST(StateRecoveryTest, testEdgesPermutationToIndex) {
+  int permutation[12] = {12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+  int index = pruning::edgesPermutationToIndex(permutation);
+  int temp[12] = {0};
+  pruning::indexToEdgePermutation(index, temp);
+  ASSERT_THAT(temp, ElementsAre(12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1));
+}

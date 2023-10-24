@@ -1,8 +1,20 @@
 #include "pruningtables.hpp"
+#include "computationalrepresentation.hpp"
+#include <array>
 #include <iterator>
 #include <vector>
 
+using std::array;
 using std::vector;
+
+void pruning::generatePruningTable(ComputationalRepresentation comp_rep,
+                                   unsigned allowed_moves[],
+                                   const unsigned n_rows,
+                                   const unsigned n_cols) {
+  vector<unsigned[2]> stack;
+  vector<vector<unsigned>> table(n_rows, std::vector<unsigned>(n_cols, -1));
+  unsigned d = 0;
+}
 
 int pruning::cornersOrientationToIndex(int orientation[]) {
   int index = 0;
@@ -38,4 +50,37 @@ int pruning::cornersPermutationToIndex(int permutation[]) {
 
 int pruning::edgesPermutationToIndex(int permutation[]) {
   return lehmerCodeEncode(permutation, 12);
+}
+
+void pruning::indexToCornerOrientation(int index, int orientation[]) {
+  for (int i = 7; i >= 0; --i) {
+    orientation[i] = index % 3;
+    index = (index - orientation[i]) / 3;
+  }
+}
+
+void pruning::indexToEdgeOrientation(int index, int orientation[]) {
+  for (int i = 11; i >= 0; --i) {
+    orientation[i] = index % 2;
+    index = (index - orientation[i]) / 2;
+  }
+}
+
+void pruning::lehmerCodeDecode(int index, int permutation[], unsigned size) {
+  permutation[size - 1] = 1;
+  for (int i = size - 1; i >= 0; --i) {
+    permutation[i] = 1 + (index % (size - 1 - i));
+    index = (index - (index % (size - 1 - i))) / (size - 1 - i);
+    for (int j = i + 1; j < size; ++j) {
+      permutation[j] = permutation[j] + int(permutation[j] >= permutation[i]);
+    }
+  }
+}
+
+void pruning::indexToCornerPermutation(int index, int permutation[]) {
+  lehmerCodeDecode(index, permutation, 8);
+}
+
+void pruning::indexToEdgePermutation(int index, int permutation[]) {
+  lehmerCodeDecode(index, permutation, 12);
 }

@@ -155,3 +155,9 @@ void ComputationalRepresentation::rotate(int rotation_id) {
     temp1 = temp2;
   }
 }
+
+void ComputationalRepresentation::rotateInverse(int rotation_id) {
+  rotate(rotation_id);
+  rotate(rotation_id);
+  rotate(rotation_id);
+}

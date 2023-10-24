@@ -96,3 +96,15 @@ TEST(RotationTest, testRotationFRUIsCorrect) {
   ASSERT_THAT(comp_rep.edge_orientation,
               ElementsAre(1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0));
 }
+
+TEST(RotationTest, testRotationRInverseIsCorrect) {
+  ComputationalRepresentation comp_rep;
+  comp_rep.rotate(4);
+  comp_rep.rotateInverse(4);
+  ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(1, 2, 3, 4, 5, 6, 7, 8));
+  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(0, 0, 0, 0, 0, 0, 0, 0));
+  ASSERT_THAT(comp_rep.edge_permutation,
+              ElementsAre(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
+  ASSERT_THAT(comp_rep.edge_orientation,
+              ElementsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+}

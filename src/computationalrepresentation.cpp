@@ -120,39 +120,44 @@ bool ComputationalRepresentation::checkCombination() {
 }
 
 void ComputationalRepresentation::rotate(int rotation_id) {
-  for (int i = 0; i < 8; ++i) {
-    corner_orientation[corner_permutation[i] - 1] =
-        (corner_orientation[corner_permutation[i] - 1] +
-         structure::corner_rotation_orientations[rotation_id][i]) %
-        3;
-  }
+  unsigned iterations = rotation_id / 6 + 1;
+  unsigned rotation = rotation_id % 6;
 
-  for (int i = 0; i < 12; ++i) {
-    edge_orientation[edge_permutation[i] - 1] =
-        (edge_orientation[edge_permutation[i] - 1] +
-         structure::edge_rotation_orientations[rotation_id][i]) %
-        2;
-  }
+  for (int i = 0; i < iterations; ++i) {
+    for (int i = 0; i < 8; ++i) {
+      corner_orientation[corner_permutation[i] - 1] =
+          (corner_orientation[corner_permutation[i] - 1] +
+           structure::corner_rotation_orientations[rotation][i]) %
+          3;
+    }
 
-  int index = structure::corner_rotation_permutations[rotation_id][0] - 1;
-  int temp1 = corner_permutation[index];
-  int temp2 = 0;
-  for (int i = 0; i < 4; ++i) {
-    index =
-        structure::corner_rotation_permutations[rotation_id][(i + 1) % 4] - 1;
-    temp2 = corner_permutation[index];
-    corner_permutation[index] = temp1;
-    temp1 = temp2;
-  }
+    for (int i = 0; i < 12; ++i) {
+      edge_orientation[edge_permutation[i] - 1] =
+          (edge_orientation[edge_permutation[i] - 1] +
+           structure::edge_rotation_orientations[rotation][i]) %
+          2;
+    }
 
-  index = structure::edge_rotation_permutations[rotation_id][0] - 1;
-  temp1 = edge_permutation[index];
-  temp2 = 0;
-  for (int i = 0; i < 4; ++i) {
-    index = structure::edge_rotation_permutations[rotation_id][(i + 1) % 4] - 1;
-    temp2 = edge_permutation[index];
-    edge_permutation[index] = temp1;
-    temp1 = temp2;
+    int index = structure::corner_rotation_permutations[rotation][0] - 1;
+    int temp1 = corner_permutation[index];
+    int temp2 = 0;
+    for (int i = 0; i < 4; ++i) {
+      index =
+          structure::corner_rotation_permutations[rotation][(i + 1) % 4] - 1;
+      temp2 = corner_permutation[index];
+      corner_permutation[index] = temp1;
+      temp1 = temp2;
+    }
+
+    index = structure::edge_rotation_permutations[rotation][0] - 1;
+    temp1 = edge_permutation[index];
+    temp2 = 0;
+    for (int i = 0; i < 4; ++i) {
+      index = structure::edge_rotation_permutations[rotation][(i + 1) % 4] - 1;
+      temp2 = edge_permutation[index];
+      edge_permutation[index] = temp1;
+      temp1 = temp2;
+    }
   }
 }
 

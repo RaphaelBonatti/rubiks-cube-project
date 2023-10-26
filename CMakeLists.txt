@@ -35,4 +35,4 @@ add_executable(test_solver tests/solver_test.cpp)
 target_link_libraries(test_solver representer gtest_main gmock_main)
 
 add_executable(test_pruner tests/pruner_test.cpp)
-target_link_libraries(test_pruner pruner gtest_main gmock_main)
+target_link_libraries(test_pruner pruner representer gtest_main gmock_main)

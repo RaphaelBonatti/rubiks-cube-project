@@ -1,4 +1,5 @@
 #include "pruningtables.hpp"
+#include <algorithm>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <stdexcept>
@@ -12,10 +13,10 @@ TEST(IndexationTest, testCornersOrientationIdentityIsIndex0) {
   ASSERT_EQ(index, 0);
 }
 
-TEST(IndexationTest, testCornersOrientationRPositionIsIndex1236) {
+TEST(IndexationTest, testCornersOrientationRPositionIsIndex412) {
   int orientation[8] = {0, 1, 2, 0, 0, 2, 1, 0};
   int index = pruning::cornersOrientationToIndex(orientation);
-  ASSERT_EQ(index, 1236);
+  ASSERT_EQ(index, 412);
 }
 
 TEST(IndexationTest, testEdgesOrientationIdentityIsIndex0) {
@@ -24,10 +25,10 @@ TEST(IndexationTest, testEdgesOrientationIdentityIsIndex0) {
   ASSERT_EQ(index, 0);
 }
 
-TEST(IndexationTest, testEdgesOrientationRPositionIsIndex1124) {
+TEST(IndexationTest, testEdgesOrientationRPositionIsIndex562) {
   int orientation[12] = {0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0};
   int index = pruning::edgesOrientationToIndex(orientation);
-  ASSERT_EQ(index, 1124);
+  ASSERT_EQ(index, 562);
 }
 
 TEST(IndexationTest, testLehmerCode3412Is16) {
@@ -107,6 +108,14 @@ TEST(StateRecoveryTest, testEdgesOrientationToIndex) {
   ASSERT_THAT(temp, ElementsAre(0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0));
 }
 
+TEST(StateRecoveryTest, testLehmerCodeDecode) {
+  int permutation[3] = {1, 3, 2};
+  int index = pruning::lehmerCodeEncode(permutation, 3);
+  int temp[3] = {0};
+  pruning::lehmerCodeDecode(index, temp, 3);
+  ASSERT_THAT(temp, ElementsAre(1, 3, 2));
+}
+
 TEST(StateRecoveryTest, testCornerPermutationToIndex) {
   int permutation[8] = {1, 3, 7, 4, 5, 2, 6, 8};
   int index = pruning::cornersPermutationToIndex(permutation);
@@ -121,4 +130,11 @@ TEST(StateRecoveryTest, testEdgesPermutationToIndex) {
   int temp[12] = {0};
   pruning::indexToEdgePermutation(index, temp);
   ASSERT_THAT(temp, ElementsAre(12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1));
+}
+
+TEST(TableGenerationTest, testPhaseOneTableElementsAreGenerated) {
+  pruning::TableGenerator().generatePhaseOneTable();
+  ASSERT_EQ(std::find(pruning::TableGenerator::g1_table.begin(),
+                      pruning::TableGenerator::g1_table.end(), UINT32_MAX),
+            pruning::TableGenerator::g1_table.end());
 }

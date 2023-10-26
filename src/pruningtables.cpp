@@ -73,7 +73,7 @@ pruning::Indexer pruning::TableGenerator::computeNextIndex(Indexer &index,
                                                            unsigned move) {
   ComputationalRepresentation comp_rep = ComputationalRepresentation();
   index.statifyEdges(comp_rep);
-  comp_rep.rotate(move);
+  comp_rep.rotateEdges(move);
   Indexer new_index;
   new_index.indexifyEdges(comp_rep);
   return new_index;

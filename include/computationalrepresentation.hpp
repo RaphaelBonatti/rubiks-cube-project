@@ -14,6 +14,8 @@ public:
   ComputationalRepresentation(char flat_cube[]);
   bool checkCombination();
   void rotate(int rotation_id);
+  void rotateEdges(int rotation_id);
+  void rotateCorners(int rotation_id);
   void rotateInverse(int rotation_id);
 
 private:

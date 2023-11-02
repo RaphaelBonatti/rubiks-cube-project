@@ -92,6 +92,12 @@ TEST(IndexationTest, testEdgesPermutationRPositionIsIndex18552630) {
   ASSERT_EQ(index, 18552630);
 }
 
+TEST(IndexationTest, testLREdgesPermutationToIndex) {
+  int permutation[12] = {1, 7, 3, 4, 5, 2, 10, 8, 9, 6, 11, 12};
+  int index = pruning::lrEdgesPermutationToIndex(permutation);
+  ASSERT_EQ(index, 168);
+}
+
 TEST(StateRecoveryTest, testCornerOrientationToIndex) {
   int orientation[8] = {0, 1, 2, 0, 0, 2, 1, 0};
   int index = pruning::cornersOrientationToIndex(orientation);
@@ -133,8 +139,14 @@ TEST(StateRecoveryTest, testEdgesPermutationToIndex) {
 }
 
 TEST(TableGenerationTest, testPhaseOneTableElementsAreGenerated) {
-  pruning::TableGenerator().generatePhaseOneTable();
-  ASSERT_EQ(std::find(pruning::TableGenerator::g1_table.begin(),
-                      pruning::TableGenerator::g1_table.end(), UINT32_MAX),
-            pruning::TableGenerator::g1_table.end());
+  std::vector<unsigned> table = pruning::PhaseOneTableGenerator().generate();
+  ASSERT_EQ(std::find(table.begin(), table.end(), UINT32_MAX), table.end());
+}
+
+TEST(TableGenerationTest, testPhaseTwoTableElementsAreGenerated) {
+  std::vector<std::vector<unsigned>> table =
+      pruning::PhaseTwoTableGenerator().generate();
+  for (auto row : table) {
+    ASSERT_EQ(std::find(row.begin(), row.end(), UINT32_MAX), row.end());
+  }
 }

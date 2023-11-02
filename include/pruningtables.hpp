@@ -35,9 +35,15 @@ private:
                      std::vector<unsigned> &table);
   static Indexer computeNextIndex(Indexer &index, unsigned move);
 };
-  static void updateTable(Indexer &index, unsigned distance);
-  static bool isVisited(Indexer &index);
-  static void addVisited(Indexer &index);
+
+class PhaseTwoTableGenerator {
+public:
+  static std::vector<std::vector<unsigned>> generate();
+
+private:
+  static void update(Indexer &index, unsigned distance,
+                     std::queue<Indexer> &indices,
+                     std::vector<std::vector<unsigned>> &table);
   static Indexer computeNextIndex(Indexer &index, unsigned move);
 };
 
@@ -46,6 +52,7 @@ void generateTable(
     std::vector<unsigned> moves, T &table,
     std::function<void(Indexer &, unsigned, std::queue<Indexer> &, T &)> update,
     std::function<Indexer(Indexer &, unsigned)> computeNextIndex);
+unsigned lrEdgesPermutationToIndex(int permutation[]);
 int cornersOrientationToIndex(int orientation[]);
 int edgesOrientationToIndex(int orientation[]);
 int cornersPermutationToIndex(int orientation[]);

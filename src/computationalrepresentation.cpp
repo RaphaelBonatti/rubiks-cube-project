@@ -25,7 +25,7 @@ void ComputationalRepresentation::computeCornerPermutationAndOrientation(
     int corner_id = structure::sorted_colors_to_corner_id[sorted_colors];
     corner_permutation[i] = corner_id;
     char primary_facet_color = corner_colors[0];
-    corner_orientation[corner_id - 1] =
+    corner_orientation[i] =
         structure::corner_color_to_orientation[corner_id - 1]
                                               [primary_facet_color];
   }
@@ -45,7 +45,7 @@ void ComputationalRepresentation::computeEdgePermutationAndOrientation(
     int edge_id = structure::sorted_colors_to_edge_id[sorted_colors];
     edge_permutation[i] = edge_id;
     char primary_facet_color = edge_colors[0];
-    edge_orientation[edge_id - 1] =
+    edge_orientation[i] =
         structure::edge_color_to_orientation[edge_id - 1][primary_facet_color];
   }
 }
@@ -126,12 +126,14 @@ void ComputationalRepresentation::rotate(int rotation_id) {
 }
 
 void ComputationalRepresentation::rotateEdges(int rotation_id) {
+  unsigned temp[12] = {0};
   for (int i = 0; i < 12; ++i) {
-    edge_orientation[edge_permutation[i] - 1] =
-        (edge_orientation[edge_permutation[i] - 1] +
-         structure::edge_rotation_orientations[rotation_id][i]) %
-        2;
+    temp[i] = (edge_orientation
+                   [structure::edge_rotation_permutations[rotation_id][i] - 1] +
+               structure::edge_rotation_orientations[rotation_id][i]) %
+              2;
   }
+  std::copy(temp, temp + 12, edge_orientation);
   int temp_edge_permutation[12];
   for (int i = 0; i < 12; ++i) {
     temp_edge_permutation[i] =
@@ -143,12 +145,15 @@ void ComputationalRepresentation::rotateEdges(int rotation_id) {
 }
 
 void ComputationalRepresentation::rotateCorners(int rotation_id) {
+  unsigned temp[8] = {0};
   for (int i = 0; i < 8; ++i) {
-    corner_orientation[corner_permutation[i] - 1] =
-        (corner_orientation[corner_permutation[i] - 1] +
+    temp[i] =
+        (corner_orientation
+             [structure::corner_rotation_permutations[rotation_id][i] - 1] +
          structure::corner_rotation_orientations[rotation_id][i]) %
         3;
   }
+  std::copy(temp, temp + 8, corner_orientation);
   int temp_corner_permutation[8];
   for (int i = 0; i < 8; ++i) {
     temp_corner_permutation[i] = corner_permutation

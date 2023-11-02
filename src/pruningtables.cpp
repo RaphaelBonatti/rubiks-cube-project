@@ -4,7 +4,9 @@
 #include <iterator>
 
 using std::array;
+using std::function;
 using std::map;
+using std::queue;
 using std::set;
 using std::vector;
 
@@ -36,30 +38,64 @@ void pruning::Indexer::statifyCorners(ComputationalRepresentation &comp_rep) {
                            comp_rep.corner_permutation);
 }
 
-ComputationalRepresentation pruning::TableGenerator::comp_rep =
-    ComputationalRepresentation();
-
-unsigned pruning::TableGenerator::g1_moves[18] = {
-    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
-
-vector<unsigned> pruning::TableGenerator::g1_table =
-    vector<unsigned>(2048, UINT32_MAX);
-
-unsigned pruning::TableGenerator::count_down = 2048;
-
-map<unsigned, map<unsigned, bool>> pruning::TableGenerator::visited;
-
-vector<pruning::Indexer> pruning::TableGenerator::temp_indices;
-
-bool pruning::TableGenerator::isVisited(Indexer &index) {
-  return (visited.find(index.edge_orientation_index) != visited.end() &&
-          visited[index.edge_orientation_index].find(
-              index.edge_permutation_index) !=
-              visited[index.edge_orientation_index].end());
+template <typename T>
+void pruning::generateTable(
+    vector<unsigned> moves, T &table,
+    function<void(Indexer &, unsigned, queue<Indexer> &, T &)> update,
+    function<Indexer(Indexer &, unsigned)> computeNextIndex) {
+  Indexer index;
+  queue<Indexer> indices;
+  unsigned distance = 0;
+  update(index, distance, indices, table);
+  ++distance;
+  uint change_distance_counter = indices.size();
+  Indexer new_index;
+  while (!indices.empty()) {
+    index = indices.front();
+    for (int move : moves) {
+      new_index = computeNextIndex(index, move);
+      update(new_index, distance, indices, table);
+    }
+    indices.pop();
+    --change_distance_counter;
+    if (change_distance_counter == 0) {
+      ++distance;
+      change_distance_counter = indices.size();
+    }
+  }
 }
 
-void pruning::TableGenerator::addVisited(Indexer &index) {
-  visited[index.edge_orientation_index][index.edge_permutation_index] = true;
+// Phase One --------------------------------------------
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
+
+void pruning::PhaseOneTableGenerator::update(Indexer &index, unsigned distance,
+                                             queue<Indexer> &indices,
+                                             vector<unsigned> &table) {
+  if (table[index.edge_orientation_index] == UINT32_MAX) {
+    table[index.edge_orientation_index] = distance;
+    indices.push(index);
+  }
+}
+
+pruning::Indexer
+pruning::PhaseOneTableGenerator::computeNextIndex(Indexer &index,
+                                                  unsigned move) {
+  ComputationalRepresentation comp_rep = ComputationalRepresentation();
+  index.statifyEdges(comp_rep);
+  for (int i = 0; i < move / 6 + 1; ++i) {
+    comp_rep.rotateEdges(move % 6);
+  }
+  Indexer new_index;
+  new_index.indexifyEdges(comp_rep);
+  return new_index;
+}
+
+vector<unsigned> pruning::PhaseOneTableGenerator::generate() {
+  vector<unsigned> moves = {0, 1,  2,  3,  4,  5,  6,  7,  8,
+                            9, 10, 11, 12, 13, 14, 15, 16, 17};
+  vector<unsigned> table(2048, UINT32_MAX);
+  generateTable<vector<unsigned>>(moves, table, update, computeNextIndex);
+  return table;
 }
 
 void pruning::TableGenerator::updateTable(Indexer &index, unsigned distance) {

@@ -2,7 +2,9 @@
 #define PRUNING_TABLES
 
 #include "computationalrepresentation.hpp"
+#include <functional>
 #include <map>
+#include <queue>
 #include <set>
 #include <vector>
 
@@ -21,23 +23,29 @@ struct Indexer {
 };
 
 class TableGenerator {
+class PhaseOneTableGenerator {
 public:
-  static void generatePhaseOneTable();
+  static std::vector<unsigned> generate();
   static unsigned g1_moves[18];
   static std::vector<unsigned> g1_table;
 
 private:
-  static ComputationalRepresentation comp_rep;
-  static unsigned count_down;
-  static std::map<unsigned, std::map<unsigned, bool>> visited;
-  static std::vector<Indexer> temp_indices;
-  static void populatePhaseOneTable(Indexer &index, unsigned distance);
+  static void update(Indexer &index, unsigned distance,
+                     std::queue<Indexer> &indices,
+                     std::vector<unsigned> &table);
+  static Indexer computeNextIndex(Indexer &index, unsigned move);
+};
   static void updateTable(Indexer &index, unsigned distance);
   static bool isVisited(Indexer &index);
   static void addVisited(Indexer &index);
   static Indexer computeNextIndex(Indexer &index, unsigned move);
 };
 
+template <typename T>
+void generateTable(
+    std::vector<unsigned> moves, T &table,
+    std::function<void(Indexer &, unsigned, std::queue<Indexer> &, T &)> update,
+    std::function<Indexer(Indexer &, unsigned)> computeNextIndex);
 int cornersOrientationToIndex(int orientation[]);
 int edgesOrientationToIndex(int orientation[]);
 int cornersPermutationToIndex(int orientation[]);

@@ -102,7 +102,7 @@ TEST(CombinationTest, testFIsCorrect) {
   ComputationalRepresentation comp_rep(flat_cube);
   ASSERT_TRUE(comp_rep.checkCombination());
   ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(1, 2, 4, 8, 5, 6, 3, 7));
-  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(0, 0, 1, 2, 0, 0, 2, 1));
+  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(0, 0, 2, 1, 0, 0, 1, 2));
   ASSERT_THAT(comp_rep.edge_permutation,
               ElementsAre(1, 2, 8, 4, 5, 6, 3, 11, 9, 10, 7, 12));
   ASSERT_THAT(comp_rep.edge_orientation,
@@ -119,7 +119,7 @@ TEST(CombinationTest, testBIsCorrect) {
   ComputationalRepresentation comp_rep(flat_cube);
   ASSERT_TRUE(comp_rep.checkCombination());
   ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(2, 6, 3, 4, 1, 5, 7, 8));
-  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(1, 2, 0, 0, 2, 1, 0, 0));
+  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(2, 1, 0, 0, 1, 2, 0, 0));
   ASSERT_THAT(comp_rep.edge_permutation,
               ElementsAre(6, 2, 3, 4, 1, 9, 7, 8, 5, 10, 11, 12));
   ASSERT_THAT(comp_rep.edge_orientation,
@@ -136,7 +136,7 @@ TEST(CombinationTest, testRIsCorrect) {
   ComputationalRepresentation comp_rep(flat_cube);
   ASSERT_TRUE(comp_rep.checkCombination());
   ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(1, 3, 7, 4, 5, 2, 6, 8));
-  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(0, 1, 2, 0, 0, 2, 1, 0));
+  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(0, 2, 1, 0, 0, 1, 2, 0));
   ASSERT_THAT(comp_rep.edge_permutation,
               ElementsAre(1, 7, 3, 4, 5, 2, 10, 8, 9, 6, 11, 12));
   ASSERT_THAT(comp_rep.edge_orientation,
@@ -153,7 +153,7 @@ TEST(CombinationTest, testLIsCorrect) {
   ComputationalRepresentation comp_rep(flat_cube);
   ASSERT_TRUE(comp_rep.checkCombination());
   ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(5, 2, 3, 1, 8, 6, 7, 4));
-  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(2, 0, 0, 1, 1, 0, 0, 2));
+  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(1, 0, 0, 2, 2, 0, 0, 1));
   ASSERT_THAT(comp_rep.edge_permutation,
               ElementsAre(1, 2, 3, 5, 12, 6, 7, 4, 9, 10, 11, 8));
   ASSERT_THAT(comp_rep.edge_orientation,
@@ -187,7 +187,7 @@ TEST(CombinationTest, testRInverseIsCorrect) {
   ComputationalRepresentation comp_rep(flat_cube);
   ASSERT_TRUE(comp_rep.checkCombination());
   ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(1, 6, 2, 4, 5, 7, 3, 8));
-  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(0, 1, 2, 0, 0, 2, 1, 0));
+  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(0, 2, 1, 0, 0, 1, 2, 0));
   ASSERT_THAT(comp_rep.edge_permutation,
               ElementsAre(1, 6, 3, 4, 5, 10, 2, 8, 9, 7, 11, 12));
   ASSERT_THAT(comp_rep.edge_orientation,
@@ -204,9 +204,9 @@ TEST(CombinationTest, testRUIsCorrect) {
   ComputationalRepresentation comp_rep(flat_cube);
   ASSERT_TRUE(comp_rep.checkCombination());
   ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(4, 2, 7, 3, 5, 1, 6, 8));
-  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(1, 2, 0, 0, 0, 2, 1, 0));
+  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(0, 2, 1, 0, 0, 1, 2, 0));
   ASSERT_THAT(comp_rep.edge_permutation,
               ElementsAre(4, 7, 2, 3, 5, 1, 10, 8, 9, 6, 11, 12));
   ASSERT_THAT(comp_rep.edge_orientation,
-              ElementsAre(1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0));
+              ElementsAre(0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0));
 }

@@ -94,7 +94,7 @@ TEST(IndexationTest, testEdgesPermutationRPositionIsIndex18552630) {
 
 TEST(IndexationTest, testLREdgesPermutationToIndex) {
   int permutation[12] = {1, 7, 3, 4, 5, 2, 10, 8, 9, 6, 11, 12};
-  int index = pruning::lrEdgesPermutationToIndex(permutation);
+  int index = pruning::udEdgesPermutationToIndex(permutation);
   ASSERT_EQ(index, 168);
 }
 
@@ -146,6 +146,14 @@ TEST(TableGenerationTest, testPhaseOneTableElementsAreGenerated) {
 TEST(TableGenerationTest, testPhaseTwoTableElementsAreGenerated) {
   std::vector<std::vector<unsigned>> table =
       pruning::PhaseTwoTableGenerator().generate();
+  for (auto row : table) {
+    ASSERT_EQ(std::find(row.begin(), row.end(), UINT32_MAX), row.end());
+  }
+}
+
+TEST(TableGenerationTest, testPhaseThreeTableElementsAreGenerated) {
+  std::vector<std::vector<unsigned>> table =
+      pruning::PhaseThreeTableGenerator().generate();
   for (auto row : table) {
     ASSERT_EQ(std::find(row.begin(), row.end(), UINT32_MAX), row.end());
   }

@@ -42,12 +42,15 @@ template <typename T>
 void pruning::generateTable(
     vector<unsigned> moves, T &table,
     function<void(Indexer &, unsigned, queue<Indexer> &, T &)> update,
-    function<Indexer(Indexer &, unsigned)> computeNextIndex) {
-  Indexer index;
+    function<Indexer(Indexer &, unsigned)> computeNextIndex,
+    function<vector<Indexer>()> generateInitialStates) {
   queue<Indexer> indices;
   unsigned distance = 0;
-  update(index, distance, indices, table);
+  for (Indexer index : generateInitialStates()) {
+    update(index, distance, indices, table);
+  }
   ++distance;
+  Indexer index;
   uint change_distance_counter = indices.size();
   Indexer new_index;
   while (!indices.empty()) {
@@ -66,7 +69,6 @@ void pruning::generateTable(
 }
 
 // Phase One --------------------------------------------
-    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
 
 void pruning::PhaseOneTableGenerator::update(Indexer &index, unsigned distance,
                                              queue<Indexer> &indices,
@@ -94,7 +96,8 @@ vector<unsigned> pruning::PhaseOneTableGenerator::generate() {
   vector<unsigned> moves = {0, 1,  2,  3,  4,  5,  6,  7,  8,
                             9, 10, 11, 12, 13, 14, 15, 16, 17};
   vector<unsigned> table(2048, UINT32_MAX);
-  generateTable<vector<unsigned>>(moves, table, update, computeNextIndex);
+  generateTable<vector<unsigned>>(moves, table, update, computeNextIndex,
+                                  []() { return vector<Indexer>{Indexer()}; });
   return table;
 }
 
@@ -106,9 +109,9 @@ void pruning::PhaseTwoTableGenerator::update(Indexer &index, unsigned distance,
   ComputationalRepresentation comp_rep = ComputationalRepresentation();
   index.statifyEdges(comp_rep);
   index.statifyCorners(comp_rep);
-  unsigned lr_perm_index = lrEdgesPermutationToIndex(comp_rep.edge_permutation);
-  if (table[index.corner_orientation_index][lr_perm_index] == UINT32_MAX) {
-    table[index.corner_orientation_index][lr_perm_index] = distance;
+  unsigned ud_perm_index = udEdgesPermutationToIndex(comp_rep.edge_permutation);
+  if (table[index.corner_orientation_index][ud_perm_index] == UINT32_MAX) {
+    table[index.corner_orientation_index][ud_perm_index] = distance;
     indices.push(index);
   }
 }
@@ -131,10 +134,76 @@ pruning::PhaseTwoTableGenerator::computeNextIndex(Indexer &index,
 vector<vector<unsigned>> pruning::PhaseTwoTableGenerator::generate() {
   vector<unsigned> moves = {0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
   vector<vector<unsigned>> table(2187, vector<unsigned>(495, UINT32_MAX));
-  generateTable<vector<vector<unsigned>>>(moves, table, update,
-                                          computeNextIndex);
+  generateTable<vector<vector<unsigned>>>(
+      moves, table, update, computeNextIndex,
+      []() { return vector<Indexer>{Indexer()}; });
   return table;
 }
+
+// Phase Three --------------------------------------------
+
+void pruning::PhaseThreeTableGenerator::update(
+    Indexer &index, unsigned distance, queue<Indexer> &indices,
+    vector<vector<unsigned>> &table) {
+  ComputationalRepresentation comp_rep = ComputationalRepresentation();
+  index.statifyEdges(comp_rep);
+  index.statifyCorners(comp_rep);
+  unsigned lr_perm_index = lrEdgesPermutationToIndex(comp_rep.edge_permutation);
+  if (table[index.corner_permutation_index][lr_perm_index] == UINT32_MAX) {
+    table[index.corner_permutation_index][lr_perm_index] = distance;
+    indices.push(index);
+  }
+}
+
+pruning::Indexer
+pruning::PhaseThreeTableGenerator::computeNextIndex(Indexer &index,
+                                                    unsigned move) {
+  ComputationalRepresentation comp_rep = ComputationalRepresentation();
+  index.statifyEdges(comp_rep);
+  index.statifyCorners(comp_rep);
+  for (int i = 0; i < move / 6 + 1; ++i) {
+    comp_rep.rotate(move % 6);
+  }
+  Indexer new_index;
+  new_index.indexifyEdges(comp_rep);
+  new_index.indexifyCorners(comp_rep);
+  return new_index;
+}
+
+vector<pruning::Indexer>
+pruning::PhaseThreeTableGenerator::generateInitialStates() {
+  vector<unsigned> moves = {6, 7, 8, 9, 10, 11};
+  set<unsigned> visited;
+  vector<Indexer> indices;
+  Indexer index;
+  queue<Indexer> temp_indices;
+  Indexer new_index;
+  std::pair<std::set<unsigned int>::iterator, bool> ret;
+  while (visited.size() < 96) {
+    index = temp_indices.front();
+    for (int move : moves) {
+      new_index = computeNextIndex(index, move);
+      if (visited.insert(new_index.corner_permutation_index).second) {
+        temp_indices.push(new_index);
+        indices.push_back(new_index);
+      }
+    }
+    temp_indices.pop();
+  }
+  return indices;
+}
+
+vector<vector<unsigned>> pruning::PhaseThreeTableGenerator::generate() {
+  vector<unsigned> moves = {0, 1, 6, 7, 8, 9, 10, 11, 12, 13};
+  vector<vector<unsigned>> table(40320, vector<unsigned>(70, UINT32_MAX));
+  generateTable<vector<vector<unsigned>>>(
+      moves, table, update, computeNextIndex, generateInitialStates);
+  return table;
+}
+
+// Phase Four --------------------------------------------
+
+// Utils --------------------------------------------
 
 unsigned nChooseK(unsigned n, unsigned k) {
   if (k > n)
@@ -150,12 +219,9 @@ unsigned nChooseK(unsigned n, unsigned k) {
     result /= i;
   }
   return result;
-    indices = temp_indices;
-    temp_indices.clear();
-  }
 }
 
-unsigned pruning::lrEdgesPermutationToIndex(int permutation[]) {
+unsigned pruning::udEdgesPermutationToIndex(int permutation[]) {
   unsigned index = 0;
   unsigned r = 4;
   for (int i = 11; i >= 0; --i) {
@@ -163,9 +229,20 @@ unsigned pruning::lrEdgesPermutationToIndex(int permutation[]) {
       index += nChooseK(i, r);
       --r;
     }
-    updateTable(new_index, distance);
-    temp_indices.emplace_back(new_index);
-    addVisited(new_index);
+  }
+  return index;
+}
+
+unsigned pruning::lrEdgesPermutationToIndex(int permutation[]) {
+  unsigned mask[8] = {0, 1, 2, 3, 8, 9, 10, 11};
+  unsigned index = 0;
+  unsigned r = 4;
+  unsigned cubie_id = 0;
+  for (int i = 7; i >= 0; --i) {
+    if ((permutation[mask[i]] - 1) % 2 == 0) {
+      index += nChooseK(i, r);
+      --r;
+    }
   }
   return index;
 }

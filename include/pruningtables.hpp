@@ -47,11 +47,25 @@ private:
   static Indexer computeNextIndex(Indexer &index, unsigned move);
 };
 
+class PhaseThreeTableGenerator {
+public:
+  static std::vector<std::vector<unsigned>> generate();
+
+private:
+  static void update(Indexer &index, unsigned distance,
+                     std::queue<Indexer> &indices,
+                     std::vector<std::vector<unsigned>> &table);
+  static Indexer computeNextIndex(Indexer &index, unsigned move);
+  static std::vector<Indexer> generateInitialStates();
+};
+
 template <typename T>
 void generateTable(
     std::vector<unsigned> moves, T &table,
     std::function<void(Indexer &, unsigned, std::queue<Indexer> &, T &)> update,
-    std::function<Indexer(Indexer &, unsigned)> computeNextIndex);
+    std::function<Indexer(Indexer &, unsigned)> computeNextIndex,
+    std::function<std::vector<Indexer>()> generateInitialStates);
+unsigned udEdgesPermutationToIndex(int permutation[]);
 unsigned lrEdgesPermutationToIndex(int permutation[]);
 int cornersOrientationToIndex(int orientation[]);
 int edgesOrientationToIndex(int orientation[]);

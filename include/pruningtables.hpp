@@ -59,6 +59,17 @@ private:
   static std::vector<Indexer> generateInitialStates();
 };
 
+class PhaseFourTableGenerator {
+public:
+  static std::vector<std::vector<unsigned>> generate();
+
+private:
+  static void update(Indexer &index, unsigned distance,
+                     std::queue<Indexer> &indices,
+                     std::vector<std::vector<unsigned>> &table);
+  static Indexer computeNextIndex(Indexer &index, unsigned move);
+};
+
 template <typename T>
 void generateTable(
     std::vector<unsigned> moves, T &table,
@@ -67,6 +78,8 @@ void generateTable(
     std::function<std::vector<Indexer>()> generateInitialStates);
 unsigned udEdgesPermutationToIndex(int permutation[]);
 unsigned lrEdgesPermutationToIndex(int permutation[]);
+unsigned tetradsPermutationToIndex(int permutation[]);
+unsigned slicesPermutationToIndex(int permutation[]);
 int cornersOrientationToIndex(int orientation[]);
 int edgesOrientationToIndex(int orientation[]);
 int cornersPermutationToIndex(int orientation[]);

@@ -158,3 +158,11 @@ TEST(TableGenerationTest, testPhaseThreeTableElementsAreGenerated) {
     ASSERT_EQ(std::find(row.begin(), row.end(), UINT32_MAX), row.end());
   }
 }
+
+TEST(TableGenerationTest, testPhaseFourTableElementsAreGenerated) {
+  std::vector<std::vector<unsigned>> table =
+      pruning::PhaseFourTableGenerator().generate();
+  for (auto row : table) {
+    ASSERT_EQ(std::find(row.begin(), row.end(), UINT32_MAX), row.end());
+  }
+}

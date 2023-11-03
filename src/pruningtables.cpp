@@ -1,4 +1,5 @@
 #include "pruningtables.hpp"
+#include <algorithm>
 #include <array>
 #include <exception>
 #include <iterator>
@@ -203,6 +204,46 @@ vector<vector<unsigned>> pruning::PhaseThreeTableGenerator::generate() {
 
 // Phase Four --------------------------------------------
 
+void pruning::PhaseFourTableGenerator::update(Indexer &index, unsigned distance,
+                                              queue<Indexer> &indices,
+                                              vector<vector<unsigned>> &table) {
+  ComputationalRepresentation comp_rep = ComputationalRepresentation();
+  index.statifyEdges(comp_rep);
+  index.statifyCorners(comp_rep);
+  unsigned tetrads_index =
+      tetradsPermutationToIndex(comp_rep.corner_permutation);
+  unsigned slices_index = slicesPermutationToIndex(comp_rep.edge_permutation);
+
+  if (table[tetrads_index][slices_index] == UINT32_MAX) {
+    table[tetrads_index][slices_index] = distance;
+    indices.push(index);
+  }
+}
+
+pruning::Indexer
+pruning::PhaseFourTableGenerator::computeNextIndex(Indexer &index,
+                                                   unsigned move) {
+  ComputationalRepresentation comp_rep = ComputationalRepresentation();
+  index.statifyEdges(comp_rep);
+  index.statifyCorners(comp_rep);
+  for (int i = 0; i < move / 6 + 1; ++i) {
+    comp_rep.rotate(move % 6);
+  }
+  Indexer new_index;
+  new_index.indexifyEdges(comp_rep);
+  new_index.indexifyCorners(comp_rep);
+  return new_index;
+}
+
+vector<vector<unsigned>> pruning::PhaseFourTableGenerator::generate() {
+  vector<unsigned> moves = {6, 7, 8, 9, 10, 11};
+  vector<vector<unsigned>> table(96, vector<unsigned>(6912, UINT32_MAX));
+  generateTable<vector<vector<unsigned>>>(
+      moves, table, update, computeNextIndex,
+      []() { return vector<Indexer>{Indexer()}; });
+  return table;
+}
+
 // Utils --------------------------------------------
 
 unsigned nChooseK(unsigned n, unsigned k) {
@@ -237,7 +278,6 @@ unsigned pruning::lrEdgesPermutationToIndex(int permutation[]) {
   unsigned mask[8] = {0, 1, 2, 3, 8, 9, 10, 11};
   unsigned index = 0;
   unsigned r = 4;
-  unsigned cubie_id = 0;
   for (int i = 7; i >= 0; --i) {
     if ((permutation[mask[i]] - 1) % 2 == 0) {
       index += nChooseK(i, r);
@@ -245,6 +285,40 @@ unsigned pruning::lrEdgesPermutationToIndex(int permutation[]) {
     }
   }
   return index;
+}
+
+unsigned pruning::tetradsPermutationToIndex(int permutation[]) {
+  int tetrad_1[4] = {permutation[0], permutation[2], permutation[5],
+                     permutation[7]};
+  int tetrad_2[4] = {permutation[1], permutation[3], permutation[4],
+                     permutation[6]};
+  unsigned tetrad_1_permutation_index = lehmerCodeEncode(tetrad_1, 4);
+  unsigned tetrad_2_position_index =
+      std::find(tetrad_2, tetrad_2 + 4, 2) - tetrad_2;
+  return tetrad_1_permutation_index + 24 * tetrad_2_position_index;
+}
+
+unsigned pruning::slicesPermutationToIndex(int permutation[]) {
+  int slice_1[4] = {permutation[0], permutation[2], permutation[8],
+                    permutation[10]};
+  int slice_2[4] = {permutation[4], permutation[5], permutation[6],
+                    permutation[7]};
+  int slice_3[4] = {permutation[1], permutation[3], permutation[9],
+                    permutation[11]};
+  unsigned slice_1_index = lehmerCodeEncode(slice_1, 4);
+  unsigned slice_2_index = lehmerCodeEncode(slice_2, 4);
+  unsigned slice_3_index = 0;
+  unsigned r = 2;
+  unsigned last = 0;
+  for (int i = 3; i >= 0; --i) {
+    if (slice_3[i] < 5) {
+      slice_3_index += nChooseK(i, r);
+      --r;
+      last = slice_3[i];
+    }
+  }
+  slice_3_index += 6 * int(last == 4);
+  return slice_1_index + 24 * slice_2_index + 24 * 24 * slice_3_index;
 }
 
 int pruning::cornersOrientationToIndex(int orientation[]) {

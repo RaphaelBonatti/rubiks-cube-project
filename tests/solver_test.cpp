@@ -1,109 +1,27 @@
 #include "computationalrepresentation.hpp"
+#include "solver.hpp"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+using std::vector;
 using testing::ElementsAre;
-using testing::Test;
 
-TEST(RotationTest, testRotationUIsCorrect) {
-  ComputationalRepresentation comp_rep;
-  comp_rep.rotate(0);
-  ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(4, 1, 2, 3, 5, 6, 7, 8));
-  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(0, 0, 0, 0, 0, 0, 0, 0));
-  ASSERT_THAT(comp_rep.edge_permutation,
-              ElementsAre(4, 1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12));
-  ASSERT_THAT(comp_rep.edge_orientation,
-              ElementsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-}
-
-TEST(RotationTest, testRotationDIsCorrect) {
-  ComputationalRepresentation comp_rep;
-  comp_rep.rotate(1);
-  ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(1, 2, 3, 4, 6, 7, 8, 5));
-  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(0, 0, 0, 0, 0, 0, 0, 0));
-  ASSERT_THAT(comp_rep.edge_permutation,
-              ElementsAre(1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 9));
-  ASSERT_THAT(comp_rep.edge_orientation,
-              ElementsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-}
-
-TEST(RotationTest, testRotationFIsCorrect) {
-  ComputationalRepresentation comp_rep;
-  comp_rep.rotate(2);
-  ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(1, 2, 4, 8, 5, 6, 3, 7));
-  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(0, 0, 2, 1, 0, 0, 1, 2));
-  ASSERT_THAT(comp_rep.edge_permutation,
-              ElementsAre(1, 2, 8, 4, 5, 6, 3, 11, 9, 10, 7, 12));
-  ASSERT_THAT(comp_rep.edge_orientation,
-              ElementsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-}
-
-TEST(RotationTest, testRotationBIsCorrect) {
-  ComputationalRepresentation comp_rep;
-  comp_rep.rotate(3);
-  ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(2, 6, 3, 4, 1, 5, 7, 8));
-  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(2, 1, 0, 0, 1, 2, 0, 0));
-  ASSERT_THAT(comp_rep.edge_permutation,
-              ElementsAre(6, 2, 3, 4, 1, 9, 7, 8, 5, 10, 11, 12));
-  ASSERT_THAT(comp_rep.edge_orientation,
-              ElementsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
-}
-
-TEST(RotationTest, testRotationRIsCorrect) {
-  ComputationalRepresentation comp_rep;
+TEST(SolverTest, testSimpleCubeCanBeSolved) {
+  Cube comp_rep;
   comp_rep.rotate(4);
-  ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(1, 3, 7, 4, 5, 2, 6, 8));
-  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(0, 2, 1, 0, 0, 1, 2, 0));
-  ASSERT_THAT(comp_rep.edge_permutation,
-              ElementsAre(1, 7, 3, 4, 5, 2, 10, 8, 9, 6, 11, 12));
-  ASSERT_THAT(comp_rep.edge_orientation,
-              ElementsAre(0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0));
+  vector<unsigned> solution = solve(comp_rep);
+  ASSERT_THAT(solution, ElementsAre(4, 10));
 }
 
-TEST(RotationTest, testRotationLIsCorrect) {
-  ComputationalRepresentation comp_rep;
-  comp_rep.rotate(5);
-  ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(5, 2, 3, 1, 8, 6, 7, 4));
-  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(1, 0, 0, 2, 2, 0, 0, 1));
-  ASSERT_THAT(comp_rep.edge_permutation,
-              ElementsAre(1, 2, 3, 5, 12, 6, 7, 4, 9, 10, 11, 8));
-  ASSERT_THAT(comp_rep.edge_orientation,
-              ElementsAre(0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1));
-}
-
-TEST(RotationTest, testRotationRUIsCorrect) {
-  ComputationalRepresentation comp_rep;
-  comp_rep.rotate(0);
-  comp_rep.rotate(4);
-  ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(4, 2, 7, 3, 5, 1, 6, 8));
-  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(0, 2, 1, 0, 0, 1, 2, 0));
-  ASSERT_THAT(comp_rep.edge_permutation,
-              ElementsAre(4, 7, 2, 3, 5, 1, 10, 8, 9, 6, 11, 12));
-  ASSERT_THAT(comp_rep.edge_orientation,
-              ElementsAre(0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0));
-}
-
-TEST(RotationTest, testRotationFRUIsCorrect) {
-  ComputationalRepresentation comp_rep;
-  comp_rep.rotate(0);
-  comp_rep.rotate(4);
-  comp_rep.rotate(2);
-  ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(4, 2, 3, 8, 5, 1, 7, 6));
-  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(0, 2, 2, 1, 0, 1, 2, 1));
-  ASSERT_THAT(comp_rep.edge_permutation,
-              ElementsAre(4, 7, 8, 3, 5, 1, 2, 11, 9, 6, 10, 12));
-  ASSERT_THAT(comp_rep.edge_orientation,
-              ElementsAre(0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0));
-}
-
-TEST(RotationTest, testRotationRInverseIsCorrect) {
-  ComputationalRepresentation comp_rep;
-  comp_rep.rotate(4);
-  comp_rep.rotateInverse(4);
-  ASSERT_THAT(comp_rep.corner_permutation, ElementsAre(1, 2, 3, 4, 5, 6, 7, 8));
-  ASSERT_THAT(comp_rep.corner_orientation, ElementsAre(0, 0, 0, 0, 0, 0, 0, 0));
-  ASSERT_THAT(comp_rep.edge_permutation,
-              ElementsAre(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12));
-  ASSERT_THAT(comp_rep.edge_orientation,
-              ElementsAre(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+TEST(SolverTest, testComplexCubeCanBeSolved) {
+  char arr[48] = {'R', 'L', 'R', 'D', 'L', 'D', 'L', 'L', 'U', 'B', 'R', 'L',
+                  'U', 'L', 'B', 'L', 'F', 'F', 'F', 'F', 'F', 'F', 'F', 'F',
+                  'U', 'U', 'D', 'D', 'R', 'U', 'U', 'L', 'B', 'B', 'B', 'B',
+                  'D', 'D', 'D', 'U', 'D', 'R', 'R', 'U', 'R', 'B', 'R', 'B'};
+  Cube cube(arr);
+  ASSERT_TRUE(cube.checkCombination());
+  vector<unsigned> solution = solve(cube);
+  ASSERT_THAT(solution,
+              ElementsAre(3, 10, 3, 4, 11, 0, 8, 7, 2, 0, 7, 3, 0, 8, 12, 8, 6,
+                          9, 10, 0, 11, 0, 11, 8, 6, 8, 6, 8, 10, 6, 9));
 }

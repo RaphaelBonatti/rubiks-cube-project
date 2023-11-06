@@ -15,45 +15,52 @@ pruning::Indexer::Indexer()
     : edge_orientation_index(0), edge_permutation_index(0),
       corner_orientation_index(0), corner_permutation_index(0){};
 
-void pruning::Indexer::indexifyEdges(ComputationalRepresentation &comp_rep) {
-  edge_orientation_index = edgesOrientationToIndex(comp_rep.edge_orientation);
-  edge_permutation_index = edgesPermutationToIndex(comp_rep.edge_permutation);
+pruning::Indexer::Indexer(const Cube &cube) { indexify(cube); }
+
+void pruning::Indexer::indexify(const Cube &cube) {
+  indexifyEdges(cube);
+  indexifyCorners(cube);
 }
 
-void pruning::Indexer::indexifyCorners(ComputationalRepresentation &comp_rep) {
-  corner_orientation_index =
-      cornersOrientationToIndex(comp_rep.corner_orientation);
-  corner_permutation_index =
-      cornersPermutationToIndex(comp_rep.corner_permutation);
+void pruning::Indexer::statify(Cube &cube) {
+  statifyEdges(cube);
+  statifyCorners(cube);
 }
 
-void pruning::Indexer::statifyEdges(ComputationalRepresentation &comp_rep) {
-  indexToEdgeOrientation(edge_orientation_index, comp_rep.edge_orientation);
-  indexToEdgePermutation(edge_permutation_index, comp_rep.edge_permutation);
+void pruning::Indexer::indexifyEdges(const Cube &cube) {
+  edge_orientation_index = edgesOrientationToIndex(cube.edge_orientation);
+  edge_permutation_index = edgesPermutationToIndex(cube.edge_permutation);
 }
 
-void pruning::Indexer::statifyCorners(ComputationalRepresentation &comp_rep) {
-  indexToCornerOrientation(corner_orientation_index,
-                           comp_rep.corner_orientation);
-  indexToCornerPermutation(corner_permutation_index,
-                           comp_rep.corner_permutation);
+void pruning::Indexer::indexifyCorners(const Cube &cube) {
+  corner_orientation_index = cornersOrientationToIndex(cube.corner_orientation);
+  corner_permutation_index = cornersPermutationToIndex(cube.corner_permutation);
+}
+
+void pruning::Indexer::statifyEdges(Cube &cube) {
+  indexToEdgeOrientation(edge_orientation_index, cube.edge_orientation);
+  indexToEdgePermutation(edge_permutation_index, cube.edge_permutation);
+}
+
+void pruning::Indexer::statifyCorners(Cube &cube) {
+  indexToCornerOrientation(corner_orientation_index, cube.corner_orientation);
+  indexToCornerPermutation(corner_permutation_index, cube.corner_permutation);
 }
 
 template <typename T>
 void pruning::generateTable(
     vector<unsigned> moves, T &table,
     function<void(Indexer &, unsigned, queue<Indexer> &, T &)> update,
-    function<Indexer(Indexer &, unsigned)> computeNextIndex,
     function<vector<Indexer>()> generateInitialStates) {
-  queue<Indexer> indices;
+  queue<Indexer> indices = {};
   unsigned distance = 0;
   for (Indexer index : generateInitialStates()) {
     update(index, distance, indices, table);
   }
   ++distance;
-  Indexer index;
+  Indexer index = Indexer();
   uint change_distance_counter = indices.size();
-  Indexer new_index;
+  Indexer new_index = Indexer();
   while (!indices.empty()) {
     index = indices.front();
     for (int move : moves) {
@@ -80,24 +87,11 @@ void pruning::PhaseOneTableGenerator::update(Indexer &index, unsigned distance,
   }
 }
 
-pruning::Indexer
-pruning::PhaseOneTableGenerator::computeNextIndex(Indexer &index,
-                                                  unsigned move) {
-  ComputationalRepresentation comp_rep = ComputationalRepresentation();
-  index.statifyEdges(comp_rep);
-  for (int i = 0; i < move / 6 + 1; ++i) {
-    comp_rep.rotateEdges(move % 6);
-  }
-  Indexer new_index;
-  new_index.indexifyEdges(comp_rep);
-  return new_index;
-}
-
 vector<unsigned> pruning::PhaseOneTableGenerator::generate() {
   vector<unsigned> moves = {0, 1,  2,  3,  4,  5,  6,  7,  8,
                             9, 10, 11, 12, 13, 14, 15, 16, 17};
   vector<unsigned> table(2048, UINT32_MAX);
-  generateTable<vector<unsigned>>(moves, table, update, computeNextIndex,
+  generateTable<vector<unsigned>>(moves, table, update,
                                   []() { return vector<Indexer>{Indexer()}; });
   return table;
 }
@@ -107,37 +101,20 @@ vector<unsigned> pruning::PhaseOneTableGenerator::generate() {
 void pruning::PhaseTwoTableGenerator::update(Indexer &index, unsigned distance,
                                              queue<Indexer> &indices,
                                              vector<vector<unsigned>> &table) {
-  ComputationalRepresentation comp_rep = ComputationalRepresentation();
-  index.statifyEdges(comp_rep);
-  index.statifyCorners(comp_rep);
-  unsigned ud_perm_index = udEdgesPermutationToIndex(comp_rep.edge_permutation);
+  Cube cube = Cube();
+  index.statify(cube);
+  unsigned ud_perm_index = udEdgesPermutationToIndex(cube.edge_permutation);
   if (table[index.corner_orientation_index][ud_perm_index] == UINT32_MAX) {
     table[index.corner_orientation_index][ud_perm_index] = distance;
     indices.push(index);
   }
 }
 
-pruning::Indexer
-pruning::PhaseTwoTableGenerator::computeNextIndex(Indexer &index,
-                                                  unsigned move) {
-  ComputationalRepresentation comp_rep = ComputationalRepresentation();
-  index.statifyEdges(comp_rep);
-  index.statifyCorners(comp_rep);
-  for (int i = 0; i < move / 6 + 1; ++i) {
-    comp_rep.rotate(move % 6);
-  }
-  Indexer new_index;
-  new_index.indexifyEdges(comp_rep);
-  new_index.indexifyCorners(comp_rep);
-  return new_index;
-}
-
 vector<vector<unsigned>> pruning::PhaseTwoTableGenerator::generate() {
   vector<unsigned> moves = {0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
   vector<vector<unsigned>> table(2187, vector<unsigned>(495, UINT32_MAX));
   generateTable<vector<vector<unsigned>>>(
-      moves, table, update, computeNextIndex,
-      []() { return vector<Indexer>{Indexer()}; });
+      moves, table, update, []() { return vector<Indexer>{Indexer()}; });
   return table;
 }
 
@@ -146,29 +123,13 @@ vector<vector<unsigned>> pruning::PhaseTwoTableGenerator::generate() {
 void pruning::PhaseThreeTableGenerator::update(
     Indexer &index, unsigned distance, queue<Indexer> &indices,
     vector<vector<unsigned>> &table) {
-  ComputationalRepresentation comp_rep = ComputationalRepresentation();
-  index.statifyEdges(comp_rep);
-  index.statifyCorners(comp_rep);
-  unsigned lr_perm_index = lrEdgesPermutationToIndex(comp_rep.edge_permutation);
+  Cube cube = Cube();
+  index.statify(cube);
+  unsigned lr_perm_index = lrEdgesPermutationToIndex(cube.edge_permutation);
   if (table[index.corner_permutation_index][lr_perm_index] == UINT32_MAX) {
     table[index.corner_permutation_index][lr_perm_index] = distance;
     indices.push(index);
   }
-}
-
-pruning::Indexer
-pruning::PhaseThreeTableGenerator::computeNextIndex(Indexer &index,
-                                                    unsigned move) {
-  ComputationalRepresentation comp_rep = ComputationalRepresentation();
-  index.statifyEdges(comp_rep);
-  index.statifyCorners(comp_rep);
-  for (int i = 0; i < move / 6 + 1; ++i) {
-    comp_rep.rotate(move % 6);
-  }
-  Indexer new_index;
-  new_index.indexifyEdges(comp_rep);
-  new_index.indexifyCorners(comp_rep);
-  return new_index;
 }
 
 vector<pruning::Indexer>
@@ -197,8 +158,8 @@ pruning::PhaseThreeTableGenerator::generateInitialStates() {
 vector<vector<unsigned>> pruning::PhaseThreeTableGenerator::generate() {
   vector<unsigned> moves = {0, 1, 6, 7, 8, 9, 10, 11, 12, 13};
   vector<vector<unsigned>> table(40320, vector<unsigned>(70, UINT32_MAX));
-  generateTable<vector<vector<unsigned>>>(
-      moves, table, update, computeNextIndex, generateInitialStates);
+  generateTable<vector<vector<unsigned>>>(moves, table, update,
+                                          generateInitialStates);
   return table;
 }
 
@@ -207,12 +168,10 @@ vector<vector<unsigned>> pruning::PhaseThreeTableGenerator::generate() {
 void pruning::PhaseFourTableGenerator::update(Indexer &index, unsigned distance,
                                               queue<Indexer> &indices,
                                               vector<vector<unsigned>> &table) {
-  ComputationalRepresentation comp_rep = ComputationalRepresentation();
-  index.statifyEdges(comp_rep);
-  index.statifyCorners(comp_rep);
-  unsigned tetrads_index =
-      tetradsPermutationToIndex(comp_rep.corner_permutation);
-  unsigned slices_index = slicesPermutationToIndex(comp_rep.edge_permutation);
+  Cube cube = Cube();
+  index.statify(cube);
+  unsigned tetrads_index = tetradsPermutationToIndex(cube.corner_permutation);
+  unsigned slices_index = slicesPermutationToIndex(cube.edge_permutation);
 
   if (table[tetrads_index][slices_index] == UINT32_MAX) {
     table[tetrads_index][slices_index] = distance;
@@ -220,31 +179,22 @@ void pruning::PhaseFourTableGenerator::update(Indexer &index, unsigned distance,
   }
 }
 
-pruning::Indexer
-pruning::PhaseFourTableGenerator::computeNextIndex(Indexer &index,
-                                                   unsigned move) {
-  ComputationalRepresentation comp_rep = ComputationalRepresentation();
-  index.statifyEdges(comp_rep);
-  index.statifyCorners(comp_rep);
-  for (int i = 0; i < move / 6 + 1; ++i) {
-    comp_rep.rotate(move % 6);
-  }
-  Indexer new_index;
-  new_index.indexifyEdges(comp_rep);
-  new_index.indexifyCorners(comp_rep);
-  return new_index;
-}
-
 vector<vector<unsigned>> pruning::PhaseFourTableGenerator::generate() {
   vector<unsigned> moves = {6, 7, 8, 9, 10, 11};
   vector<vector<unsigned>> table(96, vector<unsigned>(6912, UINT32_MAX));
   generateTable<vector<vector<unsigned>>>(
-      moves, table, update, computeNextIndex,
-      []() { return vector<Indexer>{Indexer()}; });
+      moves, table, update, []() { return vector<Indexer>{Indexer()}; });
   return table;
 }
 
 // Utils --------------------------------------------
+
+pruning::Indexer pruning::computeNextIndex(Indexer &index, unsigned move) {
+  Cube cube = Cube();
+  index.statify(cube);
+  cube.rotate(move);
+  return Indexer(cube);
+}
 
 unsigned nChooseK(unsigned n, unsigned k) {
   if (k > n)
@@ -262,7 +212,7 @@ unsigned nChooseK(unsigned n, unsigned k) {
   return result;
 }
 
-unsigned pruning::udEdgesPermutationToIndex(int permutation[]) {
+unsigned pruning::udEdgesPermutationToIndex(const int permutation[]) {
   unsigned index = 0;
   unsigned r = 4;
   for (int i = 11; i >= 0; --i) {
@@ -274,7 +224,7 @@ unsigned pruning::udEdgesPermutationToIndex(int permutation[]) {
   return index;
 }
 
-unsigned pruning::lrEdgesPermutationToIndex(int permutation[]) {
+unsigned pruning::lrEdgesPermutationToIndex(const int permutation[]) {
   unsigned mask[8] = {0, 1, 2, 3, 8, 9, 10, 11};
   unsigned index = 0;
   unsigned r = 4;
@@ -287,7 +237,7 @@ unsigned pruning::lrEdgesPermutationToIndex(int permutation[]) {
   return index;
 }
 
-unsigned pruning::tetradsPermutationToIndex(int permutation[]) {
+unsigned pruning::tetradsPermutationToIndex(const int permutation[]) {
   int tetrad_1[4] = {permutation[0], permutation[2], permutation[5],
                      permutation[7]};
   int tetrad_2[4] = {permutation[1], permutation[3], permutation[4],
@@ -298,7 +248,7 @@ unsigned pruning::tetradsPermutationToIndex(int permutation[]) {
   return tetrad_1_permutation_index + 24 * tetrad_2_position_index;
 }
 
-unsigned pruning::slicesPermutationToIndex(int permutation[]) {
+unsigned pruning::slicesPermutationToIndex(const int permutation[]) {
   int slice_1[4] = {permutation[0], permutation[2], permutation[8],
                     permutation[10]};
   int slice_2[4] = {permutation[4], permutation[5], permutation[6],
@@ -321,7 +271,7 @@ unsigned pruning::slicesPermutationToIndex(int permutation[]) {
   return slice_1_index + 24 * slice_2_index + 24 * 24 * slice_3_index;
 }
 
-int pruning::cornersOrientationToIndex(int orientation[]) {
+int pruning::cornersOrientationToIndex(const int orientation[]) {
   int index = 0;
   for (int i = 0; i < 7; ++i) {
     index = index * 3 + orientation[i];
@@ -329,7 +279,7 @@ int pruning::cornersOrientationToIndex(int orientation[]) {
   return index;
 }
 
-int pruning::edgesOrientationToIndex(int orientation[]) {
+int pruning::edgesOrientationToIndex(const int orientation[]) {
   int index = 0;
   for (int i = 0; i < 11; ++i) {
     index = index * 2 + orientation[i];
@@ -348,11 +298,11 @@ unsigned pruning::lehmerCodeEncode(const int permutation[], unsigned size) {
   return result;
 }
 
-int pruning::cornersPermutationToIndex(int permutation[]) {
+int pruning::cornersPermutationToIndex(const int permutation[]) {
   return lehmerCodeEncode(permutation, 8);
 }
 
-int pruning::edgesPermutationToIndex(int permutation[]) {
+int pruning::edgesPermutationToIndex(const int permutation[]) {
   return lehmerCodeEncode(permutation, 12);
 }
 

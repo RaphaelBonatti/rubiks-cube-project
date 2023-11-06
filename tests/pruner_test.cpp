@@ -2,8 +2,9 @@
 #include <algorithm>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <stdexcept>
+#include <iostream>
 
+using std::cout;
 using testing::ElementsAre;
 using testing::Test;
 
@@ -138,6 +139,36 @@ TEST(StateRecoveryTest, testEdgesPermutationToIndex) {
   ASSERT_THAT(temp, ElementsAre(12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1));
 }
 
+// TEST(a, a) {
+//   Cube comp_rep;
+//   pruning::Indexer index, index_other;
+//   for (int i = 0; i < 100; ++i) {
+//     cout << i << "\n";
+//     for (int j = 0; j < 100; ++j) {
+//       for (int k = 0; k < 100; ++k) {
+//         for (int l = 0; l < 100; ++l) {
+//           index.corner_orientation_index = i;
+//           index.corner_permutation_index = j;
+//           index.edge_orientation_index = k;
+//           index.edge_permutation_index = l;
+//           index.statifyCorners(comp_rep);
+//           index.statifyEdges(comp_rep);
+//           index_other.indexifyCorners(comp_rep);
+//           index_other.indexifyEdges(comp_rep);
+//           ASSERT_EQ(index.corner_orientation_index,
+//                     index_other.corner_orientation_index);
+//           ASSERT_EQ(index.corner_permutation_index,
+//                     index_other.corner_permutation_index);
+//           ASSERT_EQ(index.edge_orientation_index,
+//                     index_other.edge_orientation_index);
+//           ASSERT_EQ(index.edge_permutation_index,
+//                     index_other.edge_permutation_index);
+//         }
+//       }
+//     }
+//   }
+// }
+
 TEST(TableGenerationTest, testPhaseOneTableElementsAreGenerated) {
   std::vector<unsigned> table = pruning::PhaseOneTableGenerator().generate();
   ASSERT_EQ(std::find(table.begin(), table.end(), UINT32_MAX), table.end());
@@ -166,3 +197,31 @@ TEST(TableGenerationTest, testPhaseFourTableElementsAreGenerated) {
     ASSERT_EQ(std::find(row.begin(), row.end(), UINT32_MAX), row.end());
   }
 }
+
+// void printArray(int arr[], unsigned size) {
+//   cout << "{";
+//   for (int i = 0; i < size - 1; ++i) {
+//     cout << arr[i] << ", ";
+//   }
+//   cout << arr[size - 1] << "}";
+// }
+
+// TEST(a, a) {
+//   for (int move : pruning::PhaseOneTableGenerator::g1_moves) {
+//     Cube cr;
+
+//     cr.rotate(move%6);
+//     cout << move << "\nCorner\n";
+//     printArray(cr.corner_orientation, 8);
+
+//     cout << "\n";
+//     printArray(cr.corner_permutation, 8);
+
+//     cout << "\nEdge\n";
+//     printArray(cr.edge_orientation, 12);
+//     cout << "\n";
+//     printArray(cr.edge_permutation, 12);
+
+//     cout << "\n\n";
+//   }
+// }

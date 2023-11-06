@@ -36,7 +36,7 @@ map<char, int> structure::edge_color_to_orientation[12] = {
     {{'D', 0}, {'R', 1}}, {{'D', 0}, {'F', 1}}, {{'D', 0}, {'L', 1}}};
 
 string structure::corner_facets_to_colors(int corner_id, char flat_cube[]) {
-  const int *facets = structure::corners_facets[corner_id];
+  const int *facets = corners_facets[corner_id];
   string colors;
   colors += flat_cube[facets[0] - 1];
   colors += flat_cube[facets[1] - 1];
@@ -45,7 +45,7 @@ string structure::corner_facets_to_colors(int corner_id, char flat_cube[]) {
 }
 
 string structure::edge_facets_to_colors(int edge_id, char flat_cube[]) {
-  const int *facets = structure::edges_facets[edge_id];
+  const int *facets = edges_facets[edge_id];
   string colors;
   colors += flat_cube[facets[0] - 1];
   colors += flat_cube[facets[1] - 1];

@@ -16,24 +16,23 @@ struct Indexer {
   unsigned corner_orientation_index;
   unsigned corner_permutation_index;
   Indexer();
-  void indexifyEdges(ComputationalRepresentation &comp_rep);
-  void indexifyCorners(ComputationalRepresentation &comp_rep);
-  void statifyEdges(ComputationalRepresentation &comp_rep);
-  void statifyCorners(ComputationalRepresentation &comp_rep);
+  Indexer(const Cube &comp_rep);
+  void indexify(const Cube &comp_rep);
+  void statify(Cube &comp_rep);
+  void indexifyEdges(const Cube &comp_rep);
+  void indexifyCorners(const Cube &comp_rep);
+  void statifyEdges(Cube &comp_rep);
+  void statifyCorners(Cube &comp_rep);
 };
 
-class TableGenerator {
 class PhaseOneTableGenerator {
 public:
   static std::vector<unsigned> generate();
-  static unsigned g1_moves[18];
-  static std::vector<unsigned> g1_table;
 
 private:
   static void update(Indexer &index, unsigned distance,
                      std::queue<Indexer> &indices,
                      std::vector<unsigned> &table);
-  static Indexer computeNextIndex(Indexer &index, unsigned move);
 };
 
 class PhaseTwoTableGenerator {
@@ -44,7 +43,6 @@ private:
   static void update(Indexer &index, unsigned distance,
                      std::queue<Indexer> &indices,
                      std::vector<std::vector<unsigned>> &table);
-  static Indexer computeNextIndex(Indexer &index, unsigned move);
 };
 
 class PhaseThreeTableGenerator {
@@ -55,7 +53,6 @@ private:
   static void update(Indexer &index, unsigned distance,
                      std::queue<Indexer> &indices,
                      std::vector<std::vector<unsigned>> &table);
-  static Indexer computeNextIndex(Indexer &index, unsigned move);
   static std::vector<Indexer> generateInitialStates();
 };
 
@@ -67,23 +64,22 @@ private:
   static void update(Indexer &index, unsigned distance,
                      std::queue<Indexer> &indices,
                      std::vector<std::vector<unsigned>> &table);
-  static Indexer computeNextIndex(Indexer &index, unsigned move);
 };
 
 template <typename T>
 void generateTable(
     std::vector<unsigned> moves, T &table,
     std::function<void(Indexer &, unsigned, std::queue<Indexer> &, T &)> update,
-    std::function<Indexer(Indexer &, unsigned)> computeNextIndex,
     std::function<std::vector<Indexer>()> generateInitialStates);
-unsigned udEdgesPermutationToIndex(int permutation[]);
-unsigned lrEdgesPermutationToIndex(int permutation[]);
-unsigned tetradsPermutationToIndex(int permutation[]);
-unsigned slicesPermutationToIndex(int permutation[]);
-int cornersOrientationToIndex(int orientation[]);
-int edgesOrientationToIndex(int orientation[]);
-int cornersPermutationToIndex(int orientation[]);
-int edgesPermutationToIndex(int orientation[]);
+Indexer computeNextIndex(Indexer &index, unsigned move);
+unsigned udEdgesPermutationToIndex(const int permutation[]);
+unsigned lrEdgesPermutationToIndex(const int permutation[]);
+unsigned tetradsPermutationToIndex(const int permutation[]);
+unsigned slicesPermutationToIndex(const int permutation[]);
+int cornersOrientationToIndex(const int orientation[]);
+int edgesOrientationToIndex(const int orientation[]);
+int cornersPermutationToIndex(const int orientation[]);
+int edgesPermutationToIndex(const int orientation[]);
 void indexToCornerOrientation(int index, int orientation[]);
 void indexToEdgeOrientation(int index, int orientation[]);
 void indexToCornerPermutation(int index, int permutation[]);

@@ -1,7 +1,7 @@
 #ifndef COMPUTATIONAL_REPRESENTATION
 #define COMPUTATIONAL_REPRESENTATION
 
-class ComputationalRepresentation {
+class Cube {
 public:
   int corner_permutation[8] = {0};
   int corner_orientation[8] = {0};
@@ -9,14 +9,13 @@ public:
   int edge_orientation[12] = {0};
 
   // The default constructor init the cube to home position.
-  ComputationalRepresentation();
+  Cube();
   // The second constructor init the cube to passed combination.
-  ComputationalRepresentation(char flat_cube[]);
+  Cube(char flat_cube[]);
   bool checkCombination();
   void rotate(int rotation_id);
   void rotateEdges(int rotation_id);
   void rotateCorners(int rotation_id);
-  void rotateInverse(int rotation_id);
 
 private:
   void computeCornerPermutationAndOrientation(char flat_cube[]);

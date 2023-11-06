@@ -174,12 +174,12 @@ pruning::PhaseThreeTableGenerator::computeNextIndex(Indexer &index,
 vector<pruning::Indexer>
 pruning::PhaseThreeTableGenerator::generateInitialStates() {
   vector<unsigned> moves = {6, 7, 8, 9, 10, 11};
-  set<unsigned> visited;
-  vector<Indexer> indices;
-  Indexer index;
-  queue<Indexer> temp_indices;
-  Indexer new_index;
-  std::pair<std::set<unsigned int>::iterator, bool> ret;
+  set<unsigned> visited{};
+  vector<Indexer> indices{};
+  Indexer index{};
+  queue<Indexer> temp_indices{};
+  temp_indices.push(index);
+  Indexer new_index{};
   while (visited.size() < 96) {
     index = temp_indices.front();
     for (int move : moves) {

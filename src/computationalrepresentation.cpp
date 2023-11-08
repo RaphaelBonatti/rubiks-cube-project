@@ -11,9 +11,6 @@ using std::map;
 using std::sort;
 using std::string;
 
-void ComputationalRepresentation::computeCornerPermutationAndOrientation(
-    char flat_cube[]) {
-
 void Cube::computeCornerPermutationAndOrientation(char flat_cube[]) {
   for (int i = 0; i < 8; ++i) {
     string corner_colors = structure::corner_facets_to_colors(i, flat_cube);
@@ -34,7 +31,6 @@ void Cube::computeCornerPermutationAndOrientation(char flat_cube[]) {
 }
 
 void Cube::computeEdgePermutationAndOrientation(char flat_cube[]) {
-    char flat_cube[]) {
   for (int i = 0; i < 12; ++i) {
     string edge_colors = structure::edge_facets_to_colors(i, flat_cube);
     string sorted_colors = edge_colors;
@@ -141,10 +137,6 @@ void Cube::rotateEdges(int rotation_id) {
           2;
       temp_permutation[i] =
           edge_permutation[structure::edge_rotation_permutations[rotation][i] -
-  int temp_edge_permutation[12];
-  for (int i = 0; i < 12; ++i) {
-    temp_edge_permutation[i] =
-        edge_permutation[structure::edge_rotation_permutations[rotation_id][i] -
                            1];
     }
     std::copy(temp_orientation, temp_orientation + 12, edge_orientation);
@@ -169,16 +161,5 @@ void Cube::rotateCorners(int rotation_id) {
     }
     std::copy(temp_orientation, temp_orientation + 8, corner_orientation);
     std::copy(temp_permutation, temp_permutation + 8, corner_permutation);
-  for (int i = 0; i < 8; ++i) {
-    temp_corner_permutation[i] = corner_permutation
-        [structure::corner_rotation_permutations[rotation_id][i] - 1];
   }
-  std::copy(temp_corner_permutation, temp_corner_permutation + 8,
-            corner_permutation);
-}
-
-void ComputationalRepresentation::rotateInverse(int rotation_id) {
-  rotate(rotation_id);
-  rotate(rotation_id);
-  rotate(rotation_id);
 }

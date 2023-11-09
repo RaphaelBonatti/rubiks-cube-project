@@ -4,6 +4,6 @@
 #include "computationalrepresentation.hpp"
 #include <vector>
 
-std::vector<unsigned> solve(Cube comp_rep);
+std::vector<unsigned> solve(Cube cube);
 
 #endif

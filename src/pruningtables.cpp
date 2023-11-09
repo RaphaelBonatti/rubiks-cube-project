@@ -47,15 +47,13 @@ void pruning::Indexer::statifyCorners(Cube &cube) {
   indexToCornerPermutation(corner_permutation_index, cube.corner_permutation);
 }
 
-template <typename T>
-void pruning::generateTable(
-    vector<unsigned> moves, T &table,
-    function<void(Indexer &, unsigned, queue<Indexer> &, T &)> update,
-    function<vector<Indexer>()> generateInitialStates) {
-  queue<Indexer> indices = {};
+template <typename T> void pruning::PhaseTable<T>::generateTable() {
+  Cube cube{};
+  indices = {};
   unsigned distance = 0;
   for (Indexer index : generateInitialStates()) {
-    update(index, distance, indices, table);
+    index.statify(cube);
+    update(cube, distance);
   }
   ++distance;
   Indexer index = Indexer();
@@ -65,7 +63,8 @@ void pruning::generateTable(
     index = indices.front();
     for (int move : moves) {
       new_index = computeNextIndex(index, move);
-      update(new_index, distance, indices, table);
+      new_index.statify(cube);
+      update(cube, distance);
     }
     indices.pop();
     --change_distance_counter;
@@ -76,64 +75,101 @@ void pruning::generateTable(
   }
 }
 
-// Phase One --------------------------------------------
+template <typename T>
+vector<pruning::Indexer> pruning::PhaseTable<T>::generateInitialStates() {
+  return vector<Indexer>{Indexer()};
+}
 
-void pruning::PhaseOneTableGenerator::update(Indexer &index, unsigned distance,
-                                             queue<Indexer> &indices,
-                                             vector<unsigned> &table) {
-  if (table[index.edge_orientation_index] == UINT32_MAX) {
-    table[index.edge_orientation_index] = distance;
-    indices.push(index);
+template <typename T>
+void pruning::PhaseTable<T>::update(const Cube &cube, unsigned distance) {
+  unsigned &value = getTableValue(cube);
+  if (value == UINT32_MAX) {
+    value = distance;
+    indices.push(Indexer(cube));
   }
 }
 
-vector<unsigned> pruning::PhaseOneTableGenerator::generate() {
-  vector<unsigned> moves = {0, 1,  2,  3,  4,  5,  6,  7,  8,
-                            9, 10, 11, 12, 13, 14, 15, 16, 17};
-  vector<unsigned> table(2048, UINT32_MAX);
-  generateTable<vector<unsigned>>(moves, table, update,
-                                  []() { return vector<Indexer>{Indexer()}; });
-  return table;
-}
-
-// Phase Two --------------------------------------------
-
-void pruning::PhaseTwoTableGenerator::update(Indexer &index, unsigned distance,
-                                             queue<Indexer> &indices,
-                                             vector<vector<unsigned>> &table) {
+template <typename T>
+pruning::Indexer pruning::PhaseTable<T>::computeNextIndex(Indexer &index,
+                                                          unsigned move) {
   Cube cube = Cube();
   index.statify(cube);
-  unsigned ud_perm_index = udEdgesPermutationToIndex(cube.edge_permutation);
-  if (table[index.corner_orientation_index][ud_perm_index] == UINT32_MAX) {
-    table[index.corner_orientation_index][ud_perm_index] = distance;
-    indices.push(index);
+  cube.rotate(move);
+  return Indexer(cube);
+}
+
+template class pruning::PhaseRunner<pruning::PhaseOneTable>;
+template class pruning::PhaseRunner<pruning::PhaseTwoTable>;
+template class pruning::PhaseRunner<pruning::PhaseThreeTable>;
+template class pruning::PhaseRunner<pruning::PhaseFourTable>;
+
+template <typename T>
+pruning::PhaseRunner<T>::PhaseRunner(T &phase_table)
+    : phase_table(phase_table) {}
+
+template <typename T>
+vector<unsigned> pruning::PhaseRunner<T>::run(Cube &cube) {
+  vector<unsigned> solution{};
+  while (getDistance(cube) > 0) {
+    solution.push_back(findBestNextMove(cube));
+    cube.rotate(solution.back());
   }
+  return solution;
 }
 
-vector<vector<unsigned>> pruning::PhaseTwoTableGenerator::generate() {
-  vector<unsigned> moves = {0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-  vector<vector<unsigned>> table(2187, vector<unsigned>(495, UINT32_MAX));
-  generateTable<vector<vector<unsigned>>>(
-      moves, table, update, []() { return vector<Indexer>{Indexer()}; });
-  return table;
-}
-
-// Phase Three --------------------------------------------
-
-void pruning::PhaseThreeTableGenerator::update(
-    Indexer &index, unsigned distance, queue<Indexer> &indices,
-    vector<vector<unsigned>> &table) {
-  Cube cube = Cube();
-  index.statify(cube);
-  unsigned lr_perm_index = lrEdgesPermutationToIndex(cube.edge_permutation);
-  if (table[index.corner_permutation_index][lr_perm_index] == UINT32_MAX) {
-    table[index.corner_permutation_index][lr_perm_index] = distance;
-    indices.push(index);
+template <typename T>
+unsigned pruning::PhaseRunner<T>::findBestNextMove(const Cube &cube) {
+  Cube temp_cube = cube;
+  unsigned current_distance = getDistance(cube);
+  for (unsigned move : phase_table.moves) {
+    temp_cube = cube;
+    temp_cube.rotate(move);
+    if (getDistance(temp_cube) < current_distance) {
+      return move;
+    }
   }
+  throw std::logic_error(
+      "There was no 'best move'! This can be due to an wrong table value.");
 }
 
-vector<pruning::Indexer>
-pruning::PhaseThreeTableGenerator::generateInitialStates() {
+template <typename T>
+unsigned pruning::PhaseRunner<T>::getDistance(const Cube &cube) {
+  return phase_table.getTableValue(cube);
+}
+
+pruning::PhaseOneTable::PhaseOneTable() {
+  moves = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
+  table = vector<unsigned>(2048, UINT32_MAX);
+  generateTable();
+}
+
+unsigned &pruning::PhaseOneTable::getTableValue(const Cube &cube) {
+  return table[Indexer(cube).edge_orientation_index];
+}
+
+pruning::PhaseTwoTable::PhaseTwoTable() {
+  moves = {0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+  table = vector<vector<unsigned>>(2187, vector<unsigned>(495, UINT32_MAX));
+  generateTable();
+}
+
+unsigned &pruning::PhaseTwoTable::getTableValue(const Cube &cube) {
+  return table[Indexer(cube).corner_orientation_index]
+              [udEdgesPermutationToIndex(cube.edge_permutation)];
+}
+
+pruning::PhaseThreeTable::PhaseThreeTable() {
+  moves = {0, 1, 6, 7, 8, 9, 10, 11, 12, 13};
+  table = vector<vector<unsigned>>(40320, vector<unsigned>(70, UINT32_MAX));
+  generateTable();
+}
+
+unsigned &pruning::PhaseThreeTable::getTableValue(const Cube &cube) {
+  return table[Indexer(cube).corner_permutation_index]
+              [lrEdgesPermutationToIndex(cube.edge_permutation)];
+}
+
+vector<pruning::Indexer> pruning::PhaseThreeTable::generateInitialStates() {
   vector<unsigned> moves = {6, 7, 8, 9, 10, 11};
   set<unsigned> visited{};
   vector<Indexer> indices{};
@@ -143,7 +179,7 @@ pruning::PhaseThreeTableGenerator::generateInitialStates() {
   Indexer new_index{};
   while (visited.size() < 96) {
     index = temp_indices.front();
-    for (int move : moves) {
+    for (unsigned move : moves) {
       new_index = computeNextIndex(index, move);
       if (visited.insert(new_index.corner_permutation_index).second) {
         temp_indices.push(new_index);
@@ -155,45 +191,15 @@ pruning::PhaseThreeTableGenerator::generateInitialStates() {
   return indices;
 }
 
-vector<vector<unsigned>> pruning::PhaseThreeTableGenerator::generate() {
-  vector<unsigned> moves = {0, 1, 6, 7, 8, 9, 10, 11, 12, 13};
-  vector<vector<unsigned>> table(40320, vector<unsigned>(70, UINT32_MAX));
-  generateTable<vector<vector<unsigned>>>(moves, table, update,
-                                          generateInitialStates);
-  return table;
+pruning::PhaseFourTable::PhaseFourTable() {
+  moves = {6, 7, 8, 9, 10, 11};
+  table = vector<vector<unsigned>>(96, vector<unsigned>(6912, UINT32_MAX));
+  generateTable();
 }
 
-// Phase Four --------------------------------------------
-
-void pruning::PhaseFourTableGenerator::update(Indexer &index, unsigned distance,
-                                              queue<Indexer> &indices,
-                                              vector<vector<unsigned>> &table) {
-  Cube cube = Cube();
-  index.statify(cube);
-  unsigned tetrads_index = tetradsPermutationToIndex(cube.corner_permutation);
-  unsigned slices_index = slicesPermutationToIndex(cube.edge_permutation);
-
-  if (table[tetrads_index][slices_index] == UINT32_MAX) {
-    table[tetrads_index][slices_index] = distance;
-    indices.push(index);
-  }
-}
-
-vector<vector<unsigned>> pruning::PhaseFourTableGenerator::generate() {
-  vector<unsigned> moves = {6, 7, 8, 9, 10, 11};
-  vector<vector<unsigned>> table(96, vector<unsigned>(6912, UINT32_MAX));
-  generateTable<vector<vector<unsigned>>>(
-      moves, table, update, []() { return vector<Indexer>{Indexer()}; });
-  return table;
-}
-
-// Utils --------------------------------------------
-
-pruning::Indexer pruning::computeNextIndex(Indexer &index, unsigned move) {
-  Cube cube = Cube();
-  index.statify(cube);
-  cube.rotate(move);
-  return Indexer(cube);
+unsigned &pruning::PhaseFourTable::getTableValue(const Cube &cube) {
+  return table[tetradsPermutationToIndex(cube.corner_permutation)]
+              [slicesPermutationToIndex(cube.edge_permutation)];
 }
 
 unsigned nChooseK(unsigned n, unsigned k) {

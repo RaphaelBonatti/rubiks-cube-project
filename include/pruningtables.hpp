@@ -25,53 +25,58 @@ struct Indexer {
   void statifyCorners(Cube &comp_rep);
 };
 
-class PhaseOneTableGenerator {
+template <typename T> class PhaseTable {
 public:
-  static std::vector<unsigned> generate();
+  T table;
+  std::vector<unsigned> moves;
+  virtual unsigned &getTableValue(const Cube &cube) = 0;
 
-private:
-  static void update(Indexer &index, unsigned distance,
-                     std::queue<Indexer> &indices,
-                     std::vector<unsigned> &table);
+protected:
+  std::queue<Indexer> indices;
+  void generateTable();
+  virtual std::vector<Indexer> generateInitialStates();
+  void update(const Cube &cube, unsigned distance);
+  Indexer computeNextIndex(Indexer &index, unsigned move);
 };
 
-class PhaseTwoTableGenerator {
+template <typename T> class PhaseRunner {
 public:
-  static std::vector<std::vector<unsigned>> generate();
+  PhaseRunner(T &phase_table);
+  std::vector<unsigned> run(Cube &cube);
 
 private:
-  static void update(Indexer &index, unsigned distance,
-                     std::queue<Indexer> &indices,
-                     std::vector<std::vector<unsigned>> &table);
+  T phase_table;
+  std::vector<unsigned> solution;
+
+  unsigned findBestNextMove(const Cube &cube);
+  unsigned getDistance(const Cube &cube);
 };
 
-class PhaseThreeTableGenerator {
+class PhaseOneTable : public PhaseTable<std::vector<unsigned>> {
 public:
-  static std::vector<std::vector<unsigned>> generate();
-
-private:
-  static void update(Indexer &index, unsigned distance,
-                     std::queue<Indexer> &indices,
-                     std::vector<std::vector<unsigned>> &table);
-  static std::vector<Indexer> generateInitialStates();
+  PhaseOneTable();
+  unsigned &getTableValue(const Cube &cube);
 };
 
-class PhaseFourTableGenerator {
+class PhaseTwoTable : public PhaseTable<std::vector<std::vector<unsigned>>> {
 public:
-  static std::vector<std::vector<unsigned>> generate();
-
-private:
-  static void update(Indexer &index, unsigned distance,
-                     std::queue<Indexer> &indices,
-                     std::vector<std::vector<unsigned>> &table);
+  PhaseTwoTable();
+  unsigned &getTableValue(const Cube &cube);
 };
 
-template <typename T>
-void generateTable(
-    std::vector<unsigned> moves, T &table,
-    std::function<void(Indexer &, unsigned, std::queue<Indexer> &, T &)> update,
-    std::function<std::vector<Indexer>()> generateInitialStates);
-Indexer computeNextIndex(Indexer &index, unsigned move);
+class PhaseThreeTable : public PhaseTable<std::vector<std::vector<unsigned>>> {
+public:
+  PhaseThreeTable();
+  unsigned &getTableValue(const Cube &cube);
+  std::vector<Indexer> generateInitialStates();
+};
+
+class PhaseFourTable : public PhaseTable<std::vector<std::vector<unsigned>>> {
+public:
+  PhaseFourTable();
+  unsigned &getTableValue(const Cube &cube);
+};
+
 unsigned udEdgesPermutationToIndex(const int permutation[]);
 unsigned lrEdgesPermutationToIndex(const int permutation[]);
 unsigned tetradsPermutationToIndex(const int permutation[]);

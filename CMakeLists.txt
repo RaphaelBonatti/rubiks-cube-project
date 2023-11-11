@@ -19,24 +19,25 @@ endif()
 
 include_directories(include)
 
-add_library(representer src/computationalrepresentation.cpp src/piecesmapping.cpp src/facerotations.cpp)
-add_library(pruner src/pruningtables.cpp)
-add_library(solver src/solver.cpp)
+add_library(cube src/cube.cpp src/piecesmapping.cpp src/rotation.cpp)
+add_library(lehmercode src/lehmercode.cpp)
+add_library(pruner src/pruningtables.cpp src/indexer.cpp src/lehmercode.cpp)
+add_library(solver src/solver.cpp src/utils.cpp)
 
-# add_library(converter src/converter.cpp src/computationalrepresentation.cpp src/piecesmapping.cpp)
-# add_library(solver src/solver.cpp src/facerotations.cpp)
+add_executable(test_cube tests/cube_test.cpp)
+target_link_libraries(test_cube cube gtest_main gmock_main)
 
-# add_executable(${PROJECT_NAME} src/main.cpp)
-# target_link_libraries(${PROJECT_NAME} converter solver)
-
-add_executable(test_converter tests/converter_test.cpp)
-target_link_libraries(test_converter representer gtest_main gmock_main)
+add_executable(test_lehmercode tests/lehmercode_test.cpp)
+target_link_libraries(test_lehmercode lehmercode gtest_main gmock_main)
 
 add_executable(test_rotator tests/rotator_test.cpp)
-target_link_libraries(test_rotator representer gtest_main gmock_main)
+target_link_libraries(test_rotator cube gtest_main gmock_main)
 
 add_executable(test_pruner tests/pruner_test.cpp)
-target_link_libraries(test_pruner pruner representer gtest_main gmock_main)
+target_link_libraries(test_pruner pruner cube gtest_main gmock_main)
 
 add_executable(test_solver tests/solver_test.cpp)
-target_link_libraries(test_solver solver pruner representer gtest_main gmock_main)
+target_link_libraries(test_solver solver pruner cube gtest_main gmock_main)
+
+add_executable(main src/main.cpp)
+target_link_libraries(main solver pruner cube)

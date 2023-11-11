@@ -1,8 +1,9 @@
 #ifndef SOLVER
 #define SOLVER
 
-#include "computationalrepresentation.hpp"
 #include <vector>
+
+#include "cube.hpp"
 
 std::vector<unsigned> solve(Cube cube);
 

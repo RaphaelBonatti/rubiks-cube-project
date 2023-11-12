@@ -1,14 +1,19 @@
 #include "pruningtables.hpp"
 
 #include <exception>
+#include <filesystem>
 #include <map>
 #include <set>
 
+#include "serializer.hpp"
+
+namespace fs = std::filesystem;
 using pruning::Indexer;
 using pruning::PhaseTable;
 using std::map;
 using std::queue;
 using std::set;
+using std::string;
 using std::vector;
 
 template <typename T>
@@ -62,6 +67,40 @@ Indexer PhaseTable<T>::computeNextIndex(Indexer &index, unsigned move) {
     return Indexer(cube);
 }
 
+template <typename T>
+void PhaseTable<T>::serialize() {
+    std::ofstream ofs("../tables/" + name, std::ios::binary);
+    if (ofs.is_open()) {
+        serialization::serialize(table, ofs);
+        ofs.close();
+        return;
+    }
+
+    throw std::runtime_error("Could not open " + name + " file!");
+}
+
+template <typename T>
+void PhaseTable<T>::deserialize() {
+    std::ifstream ifs("../tables/" + name, std::ios::binary);
+    if (ifs.is_open()) {
+        serialization::deserialize(table, ifs);
+        ifs.close();
+        return;
+    }
+
+    throw std::runtime_error("Could not open " + name + " file!");
+}
+
+template <typename T>
+void PhaseTable<T>::initTable() {
+    if (fs::exists("../tables/" + name)) {
+        deserialize();
+        return;
+    }
+    generateTable();
+    serialize();
+}
+
 template class pruning::PhaseRunner<pruning::PhaseOneTable>;
 template class pruning::PhaseRunner<pruning::PhaseTwoTable>;
 template class pruning::PhaseRunner<pruning::PhaseThreeTable>;
@@ -103,7 +142,8 @@ unsigned pruning::PhaseRunner<T>::getDistance(const Cube &cube) {
 pruning::PhaseOneTable::PhaseOneTable() {
     moves = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
     table = vector<unsigned>(2048, UINT32_MAX);
-    generateTable();
+    name = "table1";
+    initTable();
 }
 
 unsigned &pruning::PhaseOneTable::getTableValue(const Cube &cube) {
@@ -113,7 +153,8 @@ unsigned &pruning::PhaseOneTable::getTableValue(const Cube &cube) {
 pruning::PhaseTwoTable::PhaseTwoTable() {
     moves = {0, 1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     table = vector<vector<unsigned>>(2187, vector<unsigned>(495, UINT32_MAX));
-    generateTable();
+    name = "table2";
+    initTable();
 }
 
 unsigned &pruning::PhaseTwoTable::getTableValue(const Cube &cube) {
@@ -124,7 +165,8 @@ unsigned &pruning::PhaseTwoTable::getTableValue(const Cube &cube) {
 pruning::PhaseThreeTable::PhaseThreeTable() {
     moves = {0, 1, 6, 7, 8, 9, 10, 11, 12, 13};
     table = vector<vector<unsigned>>(40320, vector<unsigned>(70, UINT32_MAX));
-    generateTable();
+    name = "table3";
+    initTable();
 }
 
 unsigned &pruning::PhaseThreeTable::getTableValue(const Cube &cube) {
@@ -157,7 +199,8 @@ vector<Indexer> pruning::PhaseThreeTable::generateInitialStates() {
 pruning::PhaseFourTable::PhaseFourTable() {
     moves = {6, 7, 8, 9, 10, 11};
     table = vector<vector<unsigned>>(96, vector<unsigned>(6912, UINT32_MAX));
-    generateTable();
+    name = "table4";
+    initTable();
 }
 
 unsigned &pruning::PhaseFourTable::getTableValue(const Cube &cube) {

@@ -2,6 +2,7 @@
 #define PRUNING_TABLES
 
 #include <queue>
+#include <string>
 #include <vector>
 
 #include "cube.hpp"
@@ -31,11 +32,15 @@ class PhaseTable {
     virtual unsigned &getTableValue(const Cube &cube) = 0;
 
    protected:
+    std::string name;
     std::queue<Indexer> indices;
     void generateTable();
     virtual std::vector<Indexer> generateInitialStates();
     void update(const Cube &cube, unsigned distance);
     Indexer computeNextIndex(Indexer &index, unsigned move);
+    void serialize();
+    void deserialize();
+    void initTable();
 };
 
 class PhaseOneTable : public PhaseTable<std::vector<unsigned>> {

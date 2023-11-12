@@ -2,8 +2,6 @@
 
 #include <stdexcept>
 
-using std::string;
-
 const char rotation::faces[6] = {'U', 'D', 'F', 'B', 'R', 'L'};
 
 const unsigned rotation::corner_permutations[6][8] = {
